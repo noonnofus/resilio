@@ -1,83 +1,30 @@
 'use client';
 
-import React, { createContext, useEffect, useMemo, useRef } from 'react';
-import { ResilioError, ResilioEmitter, normalizeError, resilioLogger } from '@resilio/core';
+import React, { createContext } from 'react';
+import type { ErrorCatalog, PolicyEngine, PolicyDecision, PublicError } from '@resilio/core';
 
-export interface ResilioContextValue {
-  report: (error: unknown) => void;
-  emitter: ResilioEmitter;
+export type FeedbackAdapter = (decision: PolicyDecision, error: PublicError<any>) => void;
+
+export interface ResilioContextValue<T extends ErrorCatalog = ErrorCatalog> {
+  engine: PolicyEngine<T>;
+  feedback?: FeedbackAdapter;
 }
 
-export const ResilioContext = createContext<ResilioContextValue | null>(null);
+export const ResilioContext = createContext<ResilioContextValue<any> | null>(null);
 
-export interface ResilioProviderProps {
+export interface ResilioProviderProps<T extends ErrorCatalog> {
   children: React.ReactNode;
-  onError?: (error: ResilioError) => void;
-  onUserFacingError?: (error: ResilioError) => void;
-  logErrors?: boolean;
+  engine: PolicyEngine<T>;
+  feedback?: FeedbackAdapter;
 }
 
-export function ResilioProvider({
+export function ResilioProvider<T extends ErrorCatalog>({
   children,
-  onError,
-  onUserFacingError,
-  logErrors = true,
-}: ResilioProviderProps) {
-  const emitterRef = useRef<ResilioEmitter | null>(null);
-  if (!emitterRef.current) {
-    emitterRef.current = new ResilioEmitter();
-  }
-  const emitter = emitterRef.current;
-
-  const callbacksRef = useRef({ onError, onUserFacingError, logErrors });
-  useEffect(() => {
-    callbacksRef.current = { onError, onUserFacingError, logErrors };
-  }, [onError, onUserFacingError, logErrors]);
-
-  useEffect(() => {
-    const unsubscribe = emitter.subscribe((error) => {
-      const { onError, onUserFacingError, logErrors } = callbacksRef.current;
-
-      if (logErrors) {
-        resilioLogger.log(error);
-      }
-
-      if (onError) {
-        try {
-          onError(error);
-        } catch (e) {
-          console.error('Error in ResilioProvider onError callback:', e);
-        }
-      }
-
-      if (onUserFacingError && (error.presentation === 'toast' || error.presentation === 'modal')) {
-        try {
-          onUserFacingError(error);
-        } catch (e) {
-          console.error('Error in ResilioProvider onUserFacingError callback:', e);
-        }
-      }
-    });
-
-    return () => {
-      unsubscribe();
-    };
-  }, [emitter]);
-
-  const report = useMemo(() => {
-    return (error: unknown) => {
-      const normalized = normalizeError(error);
-      emitter.emit(normalized);
-    };
-  }, [emitter]);
-
-  const contextValue = useMemo(() => ({
-    report,
-    emitter,
-  }), [report, emitter]);
-
+  engine,
+  feedback,
+}: ResilioProviderProps<T>) {
   return (
-    <ResilioContext.Provider value={contextValue}>
+    <ResilioContext.Provider value={{ engine, feedback }}>
       {children}
     </ResilioContext.Provider>
   );

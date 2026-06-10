@@ -7,7 +7,7 @@ import { ResilioContext } from './ResilioProvider.js';
 interface ResilioBoundaryInnerProps {
   children: React.ReactNode;
   fallback?: React.ReactNode | ((props: { error: ResilioError; reset: () => void }) => React.ReactNode);
-  report: (error: unknown) => void;
+  report: (error: unknown, errorInfo: React.ErrorInfo) => void;
   onCatch?: (error: ResilioError, errorInfo: React.ErrorInfo) => void;
 }
 
@@ -44,7 +44,7 @@ class ResilioBoundaryInner extends React.Component<
     }
 
     try {
-      this.props.report(normalized);
+      this.props.report(error, errorInfo);
     } catch (e) {
       console.error('Failed to report boundary error to Resilio Context:', e);
     }
@@ -94,8 +94,12 @@ export function ResilioBoundary({ children, fallback, onCatch }: ResilioBoundary
   return (
     <ResilioContext.Consumer>
       {(context) => {
-        const report = context ? context.report : (error: unknown) => {
-          console.warn('ResilioBoundary was used without ResilioProvider. Error reported to fallback logger.', error);
+        const report = (error: unknown, errorInfo: React.ErrorInfo) => {
+          if (context && context.engine) {
+            context.engine.reportException(error, { componentStack: errorInfo.componentStack }, 'react.caught');
+          } else {
+            console.warn('ResilioBoundary was used without ResilioProvider. Error reported to fallback logger.', error);
+          }
         };
         return (
           <ResilioBoundaryInner fallback={fallback} report={report} onCatch={onCatch}>
