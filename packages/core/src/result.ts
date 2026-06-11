@@ -1,4 +1,4 @@
-export type Result<T, E = any> =
+export type Result<T, E = unknown> =
   | { ok: true; data: T; error?: never }
   | { ok: false; error: E; data?: never };
 
