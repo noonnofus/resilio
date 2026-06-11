@@ -11,8 +11,4 @@ export default defineConfig({
   clean: true,
   splitting: false,
   external: ['next', 'react', 'react-dom', '@resilio/core', '@resilio/react'],
-  banner: ({ format }) => {
-    // 'use client' directive for the client entry
-    return { js: '' }
-  },
 })

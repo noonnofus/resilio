@@ -1,4 +1,4 @@
-import type { ErrorCatalog, PublicError, ErrorCode, PublicErrorFor } from '@resilio/core';
+import type { ErrorCatalog, ErrorCode, PublicErrorFor } from '@resilio/core';
 
 export type { ErrorCode, PublicErrorFor };
 

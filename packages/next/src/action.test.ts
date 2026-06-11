@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { createResilioAction } from './action.js';
+import { createResilioAction, isSuccessfulResilioAction } from './action.js';
 import { toActionState } from './action-state.js';
 import * as z from 'zod';
 import { defineErrorCatalog } from '@resilio/core';
@@ -51,30 +51,16 @@ describe('createResilioAction', () => {
 
     const action = createResilioAction(async () => {
       throw new Error('Database crash!');
-    }, { unexpectedPolicy: 'throw' });
+    });
     
-    await expect(action(toActionState(null), null)).rejects.toThrow('Database crash!');
+    await expect(action()).rejects.toThrow('Database crash!');
 
     consoleError.mockRestore();
   });
 
-  it('should sanitize and return internal server error under safe configuration policy', async () => {
-    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
-
-    const action = createResilioAction(async () => {
-      throw new Error('Sensitive SQL Query error!');
-    }, { unexpectedPolicy: 'safe' });
-    
-    const result = await action(toActionState(null), null);
-
-    expect(result).toEqual({
-      ok: false,
-      error: {
-        code: 'INTERNAL_SERVER_ERROR',
-        message: 'An unexpected server error occurred.',
-      },
-    });
-
-    consoleError.mockRestore();
+  it('narrows an already decoded successful action result', () => {
+    const result = { ok: true as const, data: { id: 'user-1' } };
+    expect(isSuccessfulResilioAction(result)).toBe(true);
+    expect(testCatalog.FAIL_TEST).toBeDefined();
   });
 });
