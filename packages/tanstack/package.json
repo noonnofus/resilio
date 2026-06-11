@@ -1,0 +1,60 @@
+{
+  "name": "@resilio/tanstack",
+  "version": "0.1.0",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./query": {
+      "types": "./dist/query.d.ts",
+      "import": "./dist/query.js",
+      "require": "./dist/query.cjs"
+    },
+    "./router": {
+      "types": "./dist/router.d.ts",
+      "import": "./dist/router.js",
+      "require": "./dist/router.cjs"
+    },
+    "./form": {
+      "types": "./dist/form.d.ts",
+      "import": "./dist/form.js",
+      "require": "./dist/form.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@resilio/core": "workspace:^"
+  },
+  "peerDependencies": {
+    "@tanstack/form-core": ">=1 <2",
+    "@tanstack/query-core": ">=5 <6",
+    "@tanstack/react-router": ">=1 <2"
+  },
+  "peerDependenciesMeta": {
+    "@tanstack/form-core": {
+      "optional": true
+    },
+    "@tanstack/query-core": {
+      "optional": true
+    },
+    "@tanstack/react-router": {
+      "optional": true
+    }
+  }
+}
