@@ -7,6 +7,11 @@ import {
   type ErrorPolicyConfig,
   defineErrorPolicy,
 } from './error.js';
+import {
+  definePresentationPolicy,
+  type PresentationDecision,
+  type PresentationPolicyConfig,
+} from './presentation.js';
 
 // 1. 임시 테스트용 카탈로그 생성
 const testCatalog = defineErrorCatalog({
@@ -85,3 +90,78 @@ const invalidPolicyParams = defineErrorPolicy(testCatalog, {
     },
   },
 });
+
+// 6. PresentationPolicyConfig Exhaustive 및 채널 타입 검증
+type AppPresentationChannel = 'inline' | 'project-modal';
+
+// @ts-expect-error - 카탈로그의 코드가 하나라도 누락되면 에러가 발생해야 함
+const invalidPresentationPolicy: PresentationPolicyConfig<TestCatalog, AppPresentationChannel> = {
+  NO_PARAMS: [
+    {
+      decide: () => ({
+        channel: 'project-modal',
+        severity: 'error',
+        messageKey: 'errors.noParams',
+      }),
+    },
+  ],
+};
+
+definePresentationPolicy<TestCatalog, AppPresentationChannel>(testCatalog, {
+  NO_PARAMS: [
+    {
+      decide: () => ({
+        channel: 'project-modal',
+        severity: 'error',
+        messageKey: 'errors.noParams',
+      }),
+    },
+  ],
+  WITH_PARAMS: [
+    {
+      decide: ({ error }) => {
+        expectTypeOf(error.params.count).toEqualTypeOf<number>();
+
+        return {
+          channel: 'inline',
+          severity: 'warning',
+          messageKey: 'errors.withParams',
+          messageArgs: { id: error.params.id, count: error.params.count },
+        };
+      },
+    },
+  ],
+});
+
+definePresentationPolicy<TestCatalog, AppPresentationChannel>(testCatalog, {
+  NO_PARAMS: [
+    {
+      decide: () => ({
+        // @ts-expect-error - 프로젝트가 선언하지 않은 채널은 정책에서 사용할 수 없음
+        channel: 'unknown-channel',
+        severity: 'error',
+        messageKey: 'errors.noParams',
+      }),
+    },
+  ],
+  WITH_PARAMS: [],
+});
+
+// 7. Custom channel payload 타입 검증
+type ProjectModalPayload = { titleKey: string; confirmAction: 'sign-in' | 'dismiss' };
+
+const projectModalDecision: PresentationDecision<'project-modal', ProjectModalPayload> = {
+  channel: 'project-modal',
+  severity: 'error',
+  messageKey: 'errors.sessionExpired',
+  payload: { titleKey: 'modals.sessionExpired', confirmAction: 'sign-in' },
+};
+expectTypeOf(projectModalDecision.payload).toEqualTypeOf<ProjectModalPayload | undefined>();
+
+const invalidProjectModalDecision: PresentationDecision<'project-modal', ProjectModalPayload> = {
+  channel: 'project-modal',
+  severity: 'error',
+  messageKey: 'errors.sessionExpired',
+  // @ts-expect-error - custom renderer payload 계약과 다른 action은 거부되어야 함
+  payload: { titleKey: 'modals.sessionExpired', confirmAction: 'retry' },
+};

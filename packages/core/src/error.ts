@@ -133,13 +133,20 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 export type ErrorSource =
   | 'manual'
+  | 'browser.error'
+  | 'browser.unhandledrejection'
   | 'react.caught'
+  | 'react.event'
+  | 'react.async'
   | 'react.uncaught'
   | 'react.recoverable'
   | 'next.request'
   | 'next.action'
+  | 'next.route'
   | 'query'
-  | 'mutation';
+  | 'mutation'
+  | 'router'
+  | 'form';
 
 export type ErrorEvent<T extends ErrorCatalog> =
   | {
