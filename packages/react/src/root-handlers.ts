@@ -1,5 +1,9 @@
 import type { ErrorCatalog, PolicyEngine } from '@resilio/core';
-import type { ErrorInfo } from 'react';
+import type { RootOptions } from 'react-dom/client';
+
+export type ResilioRootHandlers = Required<
+  Pick<RootOptions, 'onCaughtError' | 'onUncaughtError' | 'onRecoverableError'>
+>;
 
 /**
  * React 19 createRoot / hydrateRoot 옵션에 지정할 에러 관측성 핸들러를 생성합니다.
@@ -7,15 +11,15 @@ import type { ErrorInfo } from 'react';
  */
 export function createResilioRootHandlers<T extends ErrorCatalog>(
   engine: PolicyEngine<T>
-) {
+): ResilioRootHandlers {
   return {
-    onCaughtError: (error: unknown, errorInfo: ErrorInfo) => {
+    onCaughtError: (error, errorInfo) => {
       engine.reportException(error, { componentStack: errorInfo.componentStack }, 'react.caught');
     },
-    onUncaughtError: (error: unknown, errorInfo: ErrorInfo) => {
+    onUncaughtError: (error, errorInfo) => {
       engine.reportException(error, { componentStack: errorInfo.componentStack }, 'react.uncaught');
     },
-    onRecoverableError: (error: unknown, errorInfo: ErrorInfo) => {
+    onRecoverableError: (error, errorInfo) => {
       engine.reportException(error, { componentStack: errorInfo.componentStack }, 'react.recoverable');
     },
   };

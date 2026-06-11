@@ -18,6 +18,12 @@ export type PublicError<T extends ErrorCatalog> = {
       : { code: C; params?: never; correlationId?: string }
 }[keyof T & string];
 
+export interface PublicErrorValue {
+  code: string;
+  params?: unknown;
+  correlationId?: string;
+}
+
 export type ErrorCode<T extends ErrorCatalog> = keyof T & string;
 
 export type PublicErrorFor<
@@ -50,32 +56,43 @@ export function createPublicError<
       code,
       params: result.value,
       correlationId,
-    } as any;
+    } as unknown as PublicError<T>;
   }
   
   return {
     code,
     correlationId,
-  } as any;
+  } as unknown as PublicError<T>;
 }
+
+export type DecodeFailureReason = 'invalid_shape' | 'unknown_code' | 'invalid_params';
 
 export type DecodeResult<T extends ErrorCatalog> =
   | { ok: true; value: PublicError<T> }
-  | { ok: false; reason: 'invalid_shape' | 'unknown_code' | 'invalid_params' };
+  | { ok: false; reason: DecodeFailureReason };
 
 export async function decodePublicError<T extends ErrorCatalog>(
   catalog: T,
   input: unknown,
 ): Promise<DecodeResult<T>> {
-  if (!input || typeof input !== 'object') {
+  if (!isRecord(input)) {
     return { ok: false, reason: 'invalid_shape' };
   }
-  
-  const { code, params, correlationId } = input as any;
+
+  const allowedKeys = new Set(['code', 'params', 'correlationId']);
+  if (Object.keys(input).some((key) => !allowedKeys.has(key))) {
+    return { ok: false, reason: 'invalid_shape' };
+  }
+
+  const { code, params, correlationId } = input;
   if (typeof code !== 'string') {
     return { ok: false, reason: 'invalid_shape' };
   }
-  
+
+  if (correlationId !== undefined && typeof correlationId !== 'string') {
+    return { ok: false, reason: 'invalid_shape' };
+  }
+
   if (!(code in catalog)) {
     return { ok: false, reason: 'unknown_code' };
   }
@@ -93,17 +110,25 @@ export async function decodePublicError<T extends ErrorCatalog>(
         code,
         params: validateResult.value,
         correlationId,
-      } as any,
+      } as PublicError<T>,
     };
   }
-  
+
+  if ('params' in input) {
+    return { ok: false, reason: 'invalid_params' };
+  }
+
   return {
     ok: true,
     value: {
       code,
       correlationId,
-    } as any,
+    } as PublicError<T>,
   };
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
 
 export type ErrorSource =
@@ -160,15 +185,20 @@ export function createCompositeSink<T extends ErrorCatalog>(
 ): ErrorSink<T> {
   return {
     async report(event) {
-      await Promise.all(sinks.map(sink => {
-        try {
-          return sink.report(event);
-        } catch (e) {
-          console.error('[Resilio CompositeSink Error]', e);
-        }
-      }));
+      await Promise.all(sinks.map((sink) => reportToSinkBestEffort(sink, event)));
     },
   };
+}
+
+export async function reportToSinkBestEffort<T extends ErrorCatalog>(
+  sink: ErrorSink<T>,
+  event: ErrorEvent<T>,
+): Promise<void> {
+  try {
+    await sink.report(event);
+  } catch (error) {
+    console.error('[Resilio Sink Error]', error);
+  }
 }
 
 export type FeedbackType = 'inline' | 'toast' | 'modal' | 'silent';
@@ -180,7 +210,8 @@ export type PolicyEntry<P> = {
   field?: string;
   dedupe?: {
     windowMs: number;
-    fingerprint?: (params: P) => string;
+    scope?: 'engine' | 'source' | 'custom';
+    fingerprint?: (context: DedupeContext<P>) => string;
   };
 };
 
@@ -234,15 +265,45 @@ export interface DedupePolicy<P> {
   fingerprint?: (context: DedupeContext<P>) => string;
 }
 
-export function canonicalStringify(val: any): string {
-  if (val === null || val === undefined) return '';
-  if (typeof val !== 'object') return String(val);
-  if (Array.isArray(val)) {
-    return '[' + val.map(canonicalStringify).join(',') + ']';
+export function canonicalStringify(value: unknown): string {
+  return canonicalize(value, new WeakSet<object>());
+}
+
+function canonicalize(value: unknown, seen: WeakSet<object>): string {
+  if (value === null) return 'null';
+  if (value === undefined) return 'undefined';
+
+  switch (typeof value) {
+    case 'string':
+      return `string:${JSON.stringify(value)}`;
+    case 'number':
+      return `number:${Object.is(value, -0) ? '-0' : String(value)}`;
+    case 'boolean':
+      return `boolean:${String(value)}`;
+    case 'bigint':
+      return `bigint:${String(value)}`;
+    case 'symbol':
+      return `symbol:${String(value.description)}`;
+    case 'function':
+      return `function:${value.name}`;
   }
-  const sortedKeys = Object.keys(val).sort();
-  const pairs = sortedKeys.map(k => `${k}:${canonicalStringify(val[k])}`);
-  return '{' + pairs.join(',') + '}';
+
+  if (seen.has(value)) {
+    return 'circular';
+  }
+  seen.add(value);
+
+  if (value instanceof Date) {
+    return `date:${value.toISOString()}`;
+  }
+  if (Array.isArray(value)) {
+    return `array:[${value.map((item) => canonicalize(item, seen)).join(',')}]`;
+  }
+
+  const pairs = Object.keys(value)
+    .sort()
+    .map((key) => `${JSON.stringify(key)}:${canonicalize((value as Record<string, unknown>)[key], seen)}`);
+  return `object:{${pairs.join(',')}}`;
 }
 
 export function stringHash(str: string): string {
@@ -308,18 +369,14 @@ export class PolicyEngine<T extends ErrorCatalog> {
     const timestamp = Date.now();
 
     if (this.sink) {
-      try {
-        this.sink.report({
-          occurrenceId,
-          timestamp,
-          source,
-          kind: 'public',
-          error,
-          context,
-        });
-      } catch (e) {
-        console.error('[Resilio Sink Error]', e);
-      }
+      void reportToSinkBestEffort(this.sink, {
+        occurrenceId,
+        timestamp,
+        source,
+        kind: 'public',
+        error,
+        context,
+      });
     }
 
     const policyEntry = this.policy[error.code];
@@ -330,7 +387,7 @@ export class PolicyEngine<T extends ErrorCatalog> {
     let message = '';
     if (policyEntry) {
       if (typeof policyEntry.message === 'function') {
-        message = (policyEntry.message as any)(error.params);
+        message = (policyEntry.message as (params: unknown) => string)(error.params);
       } else {
         message = policyEntry.message;
       }
@@ -344,12 +401,30 @@ export class PolicyEngine<T extends ErrorCatalog> {
     if (policyEntry?.dedupe) {
       const dedupePolicy = policyEntry.dedupe;
       const windowMs = dedupePolicy.windowMs;
-      
+      const canonicalHash = stringHash(canonicalStringify(error.params));
+
+      const dedupeContext: DedupeContext<unknown> = {
+        source,
+        scopeKey,
+        code: error.code,
+        feedback,
+        field,
+        params: error.params,
+      };
+
       if (dedupePolicy.fingerprint) {
-        fingerprintStr = dedupePolicy.fingerprint(error.params as any);
+        fingerprintStr = (dedupePolicy.fingerprint as (context: DedupeContext<unknown>) => string)(dedupeContext);
       } else {
-        const canonicalHash = stringHash(canonicalStringify(error.params));
-        fingerprintStr = `${source}::${scopeKey || ''}::${error.code}::${feedback}::${field || ''}::${canonicalHash}`;
+        const scope = dedupePolicy.scope;
+        if (scope === 'engine') {
+          fingerprintStr = `engine::${error.code}::${feedback}::${field || ''}::${canonicalHash}`;
+        } else if (scope === 'source') {
+          fingerprintStr = `source::${source}::${error.code}::${feedback}::${field || ''}::${canonicalHash}`;
+        } else if (scope === 'custom') {
+          fingerprintStr = `custom::${scopeKey || ''}::${error.code}::${feedback}::${field || ''}::${canonicalHash}`;
+        } else {
+          fingerprintStr = `${source}::${scopeKey || ''}::${error.code}::${feedback}::${field || ''}::${canonicalHash}`;
+        }
       }
 
       suppressed = this.dedupeStore.shouldSuppress(fingerprintStr, timestamp, windowMs);
@@ -375,19 +450,15 @@ export class PolicyEngine<T extends ErrorCatalog> {
     const timestamp = Date.now();
 
     if (this.sink) {
-      try {
-        this.sink.report({
-          occurrenceId,
-          timestamp,
-          source,
-          kind: 'exception',
-          error,
-          correlationId,
-          context,
-        });
-      } catch (e) {
-        console.error('[Resilio Sink Error]', e);
-      }
+      void reportToSinkBestEffort(this.sink, {
+        occurrenceId,
+        timestamp,
+        source,
+        kind: 'exception',
+        error,
+        correlationId,
+        context,
+      });
     }
   }
 
@@ -400,23 +471,23 @@ export class PolicyEngine<T extends ErrorCatalog> {
     const timestamp = Date.now();
 
     if (this.sink) {
-      try {
-        this.sink.report({
-          occurrenceId,
-          timestamp,
-          source,
-          kind: 'invalid_public_error',
-          reason,
-          context,
-        });
-      } catch (e) {
-        console.error('[Resilio Sink Error]', e);
-      }
+      void reportToSinkBestEffort(this.sink, {
+        occurrenceId,
+        timestamp,
+        source,
+        kind: 'invalid_public_error',
+        reason,
+        context,
+      });
     }
   }
 }
 
 // 기존 테스트 및 하위 호환을 위한 레거시 코드 보존
+/**
+ * @deprecated 이 타입은 kind 기반 레거시 에러 분류용입니다.
+ * 신규 스펙의 Catalog 기반 에러 정의(`ErrorCatalog`)를 사용하십시오.
+ */
 export type ResilioErrorKind =
   | 'validation'
   | 'authorization'
@@ -425,6 +496,10 @@ export type ResilioErrorKind =
   | 'server'
   | 'unknown';
 
+/**
+ * @deprecated 이 타입은 kind 기반 레거시 에러 모델입니다.
+ * 신규 스펙의 `PublicError<T>` 제네릭 에러 타입을 사용하십시오.
+ */
 export interface ResilioError {
   kind: ResilioErrorKind;
   message: string;
@@ -434,10 +509,13 @@ export interface ResilioError {
   presentation?: 'inline' | 'toast' | 'modal' | 'boundary';
 }
 
-export function isResilioError(value: any): value is ResilioError {
+/**
+ * @deprecated 이 함수는 레거시 ResilioError 판단용입니다.
+ * 신규 스펙의 `decodePublicError` 및 `createPublicError` 인터페이스를 사용하십시오.
+ */
+export function isResilioError(value: unknown): value is ResilioError {
   return (
-    value !== null &&
-    typeof value === 'object' &&
+    isRecord(value) &&
     typeof value.message === 'string' &&
     (value.kind === 'validation' ||
       value.kind === 'authorization' ||
@@ -451,11 +529,16 @@ export function isResilioError(value: any): value is ResilioError {
 // 레거시 shouldSuppress 함수 (기존 파일 호환용)
 export interface DedupeCheckOptions {
   code: string;
-  params?: any;
+  params?: unknown;
   field?: string;
   dedupeMs?: number;
 }
 const legacyLastFiredMap = new Map<string, number>();
+
+/**
+ * @deprecated 이 함수는 레거시 에러 중복 제거용입니다.
+ * 신규 스펙의 `PolicyEngine` 및 `BoundedDedupeStore` 메커니즘을 사용하십시오.
+ */
 export function shouldSuppress(options: DedupeCheckOptions): boolean {
   const { code, params, field, dedupeMs } = options;
   if (!dedupeMs || dedupeMs <= 0) {

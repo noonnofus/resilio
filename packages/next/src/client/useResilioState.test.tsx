@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import React from 'react';
+import React, { startTransition } from 'react';
 import { render, screen, act, cleanup } from '@testing-library/react';
 import { ResilioProvider } from '@resilio/react';
-import { useResilioState } from './useResilioState.js';
+import { useResilioState, type ResilioActionState } from './useResilioState.js';
 import * as z from 'zod';
 import { defineErrorCatalog, PolicyEngine, defineErrorPolicy, PublicActionResult } from '@resilio/next';
 
@@ -32,11 +32,15 @@ function TestStateComponent({
   onSuccess,
   onError,
 }: {
-  action: (state: any, payload: void) => Promise<PublicActionResult<DemoData, typeof testCatalog>>;
+  action: (
+    state: ResilioActionState<DemoData, typeof testCatalog>,
+    payload: void,
+  ) => Promise<PublicActionResult<DemoData, typeof testCatalog>>;
   onSuccess: (data: DemoData) => void;
   onError: (error: any) => void;
 }) {
   const [state, execute, isPending] = useResilioState(action, {
+    catalog: testCatalog,
     onSuccess,
     onError,
   });
@@ -45,7 +49,7 @@ function TestStateComponent({
     <div>
       <span data-testid="pending">{isPending ? 'true' : 'false'}</span>
       <span data-testid="status">{state?.ok ? 'ok' : 'err'}</span>
-      <button data-testid="submit-btn" onClick={() => execute()}>
+      <button data-testid="submit-btn" onClick={() => startTransition(() => execute())}>
         Execute
       </button>
     </div>
@@ -115,5 +119,60 @@ describe('useResilioState', () => {
       message: 'failed test',
     });
     expect(screen.getByTestId('status').textContent).toBe('err');
+  });
+
+  it('should reject invalid action payloads before policy evaluation', async () => {
+    const action = async () => ({
+      ok: false as const,
+      error: { code: 'UNKNOWN_CODE', stack: 'sensitive' },
+    }) as any;
+    const onSuccess = vi.fn();
+    const onError = vi.fn();
+    const onInvalidPublicError = vi.fn();
+    const feedback = vi.fn();
+    const sink = { report: vi.fn() };
+
+    const engine = new PolicyEngine({
+      catalog: testCatalog,
+      policy: testPolicy,
+      sink,
+    });
+
+    function InvalidPayloadComponent() {
+      const [state, execute] = useResilioState(action, {
+        catalog: testCatalog,
+        onInvalidPublicError,
+      });
+      return (
+        <>
+          <span data-testid="invalid-status">{state?.ok ? 'ok' : 'err'}</span>
+          <button
+            data-testid="invalid-submit"
+            onClick={() => startTransition(() => execute(undefined))}
+          >
+            Execute
+          </button>
+        </>
+      );
+    }
+
+    render(
+      <ResilioProvider engine={engine} feedback={feedback}>
+        <InvalidPayloadComponent />
+      </ResilioProvider>
+    );
+
+    await act(async () => {
+      screen.getByTestId('invalid-submit').click();
+    });
+
+    expect(onSuccess).not.toHaveBeenCalled();
+    expect(onError).not.toHaveBeenCalled();
+    expect(onInvalidPublicError).toHaveBeenCalledWith('invalid_shape');
+    expect(feedback).not.toHaveBeenCalled();
+    expect(sink.report).toHaveBeenCalledWith(expect.objectContaining({
+      kind: 'invalid_public_error',
+      reason: 'invalid_shape',
+    }));
   });
 });

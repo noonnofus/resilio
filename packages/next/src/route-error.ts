@@ -1,4 +1,6 @@
+import type { Instrumentation } from 'next';
 import type { ErrorCatalog, ErrorSink } from '@resilio/core';
+import { reportToSinkBestEffort } from '@resilio/core';
 
 /**
  * Next.js 15+ instrumentation.ts의 onRequestError 규격에 맞는 오류 관측성 핸들러를 생성합니다.
@@ -6,18 +8,14 @@ import type { ErrorCatalog, ErrorSink } from '@resilio/core';
  */
 export function createResilioOnRequestError<T extends ErrorCatalog>(
   sink: ErrorSink<T>
-) {
-  return async (
-    error: unknown,
-    request: { path: string; method: string; headers?: any },
-    context: { routerKind: 'pages' | 'app'; routePath?: string }
-  ): Promise<void> => {
+): Instrumentation.onRequestError {
+  return async (error, request, context) => {
     const safePath = request.path ? request.path.split('?')[0] : '';
-    const digest = (error as any)?.digest;
+    const digest = getErrorDigest(error);
     const occurrenceId = Math.random().toString(36).substring(2, 15);
     const timestamp = Date.now();
 
-    await sink.report({
+    await reportToSinkBestEffort(sink, {
       occurrenceId,
       timestamp,
       source: 'next.request',
@@ -29,10 +27,20 @@ export function createResilioOnRequestError<T extends ErrorCatalog>(
         method: request.method,
         routerKind: context.routerKind,
         routePath: context.routePath,
+        routeType: context.routeType,
+        renderSource: context.renderSource,
+        revalidateReason: context.revalidateReason,
         digest,
       },
     });
   };
+}
+
+function getErrorDigest(error: unknown): string | undefined {
+  if (!error || typeof error !== 'object' || !('digest' in error)) {
+    return undefined;
+  }
+  return typeof error.digest === 'string' ? error.digest : undefined;
 }
 
 // 기존 하위 호환을 위한 레거시 헬퍼

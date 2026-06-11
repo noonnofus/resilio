@@ -1,11 +1,18 @@
 import { ResilioError, ResilioErrorKind } from './error.js';
 
+/**
+ * @deprecated 이 인터페이스는 레거시 normalizeError 설정용입니다.
+ */
 export interface NormalizeOptions {
   defaultKind?: ResilioErrorKind;
   defaultMessage?: string;
   defaultPresentation?: 'inline' | 'toast' | 'modal' | 'boundary';
 }
 
+/**
+ * @deprecated 이 함수는 message 기반의 레거시 에러 정규화 함수입니다.
+ * 신규 Catalog 기반 `decodePublicError` 등을 사용하십시오.
+ */
 export function normalizeError(error: unknown, options: NormalizeOptions = {}): ResilioError {
   const defaultKind = options.defaultKind || 'unknown';
   const defaultMessage = options.defaultMessage || 'An unexpected error occurred.';
@@ -74,6 +81,9 @@ export function normalizeError(error: unknown, options: NormalizeOptions = {}): 
   }
 }
 
+/**
+ * @deprecated 이 함수는 레거시 ResilioError 직렬화용입니다.
+ */
 export function serializeError(error: ResilioError): ResilioError {
   return {
     kind: error.kind,
@@ -121,6 +131,9 @@ function inferErrorKindFromError(error: Error, defaultKind: ResilioErrorKind): R
   return defaultKind;
 }
 
+/**
+ * @deprecated 이 함수는 레거시 재시도 가능 에러 판별용입니다.
+ */
 export function isRetryableError(error: any): boolean {
   if (error && typeof error === 'object') {
     if ('retryable' in error && typeof error.retryable === 'boolean') {

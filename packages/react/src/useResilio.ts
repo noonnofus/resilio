@@ -2,7 +2,7 @@
 
 import { useContext } from 'react';
 import { ResilioContext } from './ResilioProvider.js';
-import type { ErrorCatalog, PublicError, ErrorSource } from '@resilio/core';
+import type { ErrorCatalog, PublicError, PublicErrorValue, ErrorSource } from '@resilio/core';
 
 export function useResilio() {
   const context = useContext(ResilioContext);
@@ -20,11 +20,11 @@ export function useReportError() {
 
   return {
     public: (
-      error: PublicError<any>,
+      error: PublicErrorValue,
       options?: { source?: ErrorSource; scopeKey?: string; context?: Record<string, unknown> }
     ) => {
       const decision = engine.reportPublic(
-        error,
+        error as PublicError<ErrorCatalog>,
         options?.context,
         options?.source || 'manual',
         options?.scopeKey
@@ -44,6 +44,16 @@ export function useReportError() {
         options?.context,
         options?.source || 'manual',
         options?.correlationId
+      );
+    },
+    invalidPublic: (
+      reason: string,
+      options?: { source?: ErrorSource; context?: Record<string, unknown> }
+    ) => {
+      engine.reportInvalidPublicError(
+        reason,
+        options?.context,
+        options?.source || 'manual',
       );
     },
   };
