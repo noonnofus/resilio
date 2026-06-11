@@ -1,9 +1,9 @@
 // React components & hooks
 export * from './ResilioProvider.js';
-export * from './ResilioBoundary.js';
 export * from './useResilio.js';
 export * from './useResilioAlert.js';
 export * from './root-handlers.js';
+export * from './error-boundary-bridge.js';
 
 // Re-export core utilities — so pure React users only install @resilio/react
 export { 
