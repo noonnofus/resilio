@@ -26,4 +26,29 @@ describe('createResilioRootHandlers', () => {
       'react.recoverable',
     ]);
   });
+
+  it('does not report the same Error object twice across React callbacks', async () => {
+    const catalog = defineErrorCatalog({ TEST: {} });
+    const sink = { report: vi.fn() };
+    const engine = new PolicyEngine({
+      catalog,
+      policy: defineErrorPolicy(catalog, {
+        TEST: { feedback: 'silent', message: 'test' },
+      }),
+      sink,
+    });
+    const handlers = createResilioRootHandlers(engine);
+    const error = new Error('same error');
+
+    handlers.onCaughtError(error, { componentStack: 'stack' });
+    handlers.onCaughtError(error, { componentStack: 'stack' });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(sink.report).toHaveBeenCalledTimes(1);
+
+    handlers.onCaughtError(error, { componentStack: 'stack' });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(sink.report).toHaveBeenCalledTimes(2);
+  });
 });

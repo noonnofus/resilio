@@ -1,9 +1,14 @@
 'use client';
 
 import { useActionState } from 'react';
-import { useReportError } from '@resilio/react';
+import { useOptionalPresentError, useOptionalReportError } from '@resilio/react';
 import { decodePublicError } from '@resilio/core';
-import type { DecodeFailureReason, ErrorCatalog, PublicError } from '@resilio/core';
+import type {
+  DecodeFailureReason,
+  ErrorCatalog,
+  PresentationContext,
+  PublicError,
+} from '@resilio/core';
 import type { PublicActionResult } from '../types.js';
 
 export interface UseResilioStateOptions<TData, TCatalog extends ErrorCatalog> {
@@ -12,6 +17,7 @@ export interface UseResilioStateOptions<TData, TCatalog extends ErrorCatalog> {
   onSuccess?: (data: TData) => void;
   onError?: (error: PublicError<TCatalog>) => void;
   onInvalidPublicError?: (reason: DecodeFailureReason) => void;
+  presentation?: Omit<PresentationContext, 'source'>;
 }
 
 export type ResilioActionState<TData, TCatalog extends ErrorCatalog> =
@@ -20,7 +26,7 @@ export type ResilioActionState<TData, TCatalog extends ErrorCatalog> =
 /**
  * Next.js Server Action의 에러 핸들링과 UI 바인딩을 자동화하는 React 19 훅입니다.
  * React 19 useActionState와 동일한 시그니처를 제공하면서, 실패 상태(ok === false) 리턴 시
- * 전역 ResilioProvider에 자동으로 에러를 전달(report.public)합니다.
+ * 전역 ResilioProvider에 자동으로 예상 오류를 전달하고 UI 정책을 평가합니다.
  */
 export function useResilioState<Payload, TData, TCatalog extends ErrorCatalog>(
   action: (
@@ -29,7 +35,8 @@ export function useResilioState<Payload, TData, TCatalog extends ErrorCatalog>(
   ) => Promise<ResilioActionState<TData, TCatalog>>,
   options: UseResilioStateOptions<TData, TCatalog>
 ) {
-  const report = useReportError();
+  const report = useOptionalReportError();
+  const present = useOptionalPresentError();
 
   const initialState: ResilioActionState<TData, TCatalog> = {
     ok: true,
@@ -46,28 +53,19 @@ export function useResilioState<Payload, TData, TCatalog extends ErrorCatalog>(
       if (!res.ok && res.error) {
         const decoded = await decodePublicError(options.catalog, res.error);
         if (!decoded.ok) {
-          report.invalidPublic(decoded.reason, { source: 'next.action' });
+          report?.invalidPublic(decoded.reason, { source: 'next.action' });
           options.onInvalidPublicError?.(decoded.reason);
           return res;
         }
 
-        report.public(decoded.value, { source: 'next.action' });
-        
-        if (options.onError) {
-          try {
-            options.onError(decoded.value);
-          } catch (e) {
-            console.error('Error in useResilioState onError callback:', e);
-          }
-        }
+        report?.public(decoded.value, { source: 'next.action' });
+        await present?.(decoded.value, {
+          ...options.presentation,
+          source: 'next.action',
+        });
+        options.onError?.(decoded.value);
       } else if (res.ok && res.data != null) {
-        if (options.onSuccess) {
-          try {
-            options.onSuccess(res.data);
-          } catch (e) {
-            console.error('Error in useResilioState onSuccess callback:', e);
-          }
-        }
+        options.onSuccess?.(res.data);
       }
     }
     return res;

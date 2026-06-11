@@ -4,6 +4,10 @@ export * from './useResilio.js';
 export * from './useResilioAlert.js';
 export * from './root-handlers.js';
 export * from './error-boundary-bridge.js';
+export * from './ResilioErrorBoundary.js';
+export * from './presentation.js';
+export * from './capture.js';
+export * from './browser-error-bridge.js';
 
 // Re-export core utilities — so pure React users only install @resilio/react
 export { 
@@ -11,6 +15,7 @@ export {
   err, 
   isOk, 
   isErr, 
+  isPublicResult,
   normalizeError, 
   serializeError, 
   isRetryableError, 
@@ -25,11 +30,14 @@ export {
   PolicyEngine,
   canonicalStringify,
   stringHash,
-  BoundedDedupeStore
+  BoundedDedupeStore,
+  definePresentationPolicy,
+  createPresentationEvaluator
 } from '@resilio/core';
 
 export type { 
   Result, 
+  PublicResult,
   ResilioError, 
   ResilioErrorKind, 
   RetryPolicy, 
@@ -51,7 +59,21 @@ export type {
   PolicyDecision,
   DedupeContext,
   DedupePolicy,
-  PolicyEngineOptions
+  PolicyEngineOptions,
+  BuiltInChannel,
+  PresentationContext,
+  PresentationDecision,
+  PresentationPlan,
+  PresentationPlanInput,
+  PresentationRule,
+  PresentationPolicyConfig,
+  EvaluatedPresentationDecision,
+  PresentationInvalidReason,
+  PresentationEvaluationResult,
+  PresentationEvaluator,
+  PresentationEvaluatorOptions,
+  PresentationObservationEvent,
+  PresentationObserver
 } from '@resilio/core';
 
 export { ResilioEmitter, globalResilioEmitter, ResilioLogger, resilioLogger, defaultConsoleLogger } from '@resilio/core';
