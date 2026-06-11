@@ -175,26 +175,34 @@ function SaveButton() {
 }
 ```
 
-### 3. Error Boundary
+### 3. Error Boundary (react-error-boundary 연동)
+
+`@resilio/react`는 독자적인 Error Boundary 컴포넌트를 제공하지 않습니다. 사용자 앱에 설치한 `react-error-boundary`와 bridge hook을 연동합니다.
+
+`useResilioErrorBoundaryHandler` 훅을 사용해 포착된 예외를 Resilio Telemetry로 즉시 전송할 수 있습니다.
 
 ```tsx
-import { ResilioBoundary } from '@resilio/react';
+import { ErrorBoundary } from 'react-error-boundary';
+import { useResilioErrorBoundaryHandler } from '@resilio/react';
 
 function App() {
+  const handleError = useResilioErrorBoundaryHandler({ boundary: 'app' });
+
   return (
-    <ResilioBoundary
-      fallback={({ error, reset }) => (
-        <div>
-          <p>{error.message}</p>
-          <button onClick={reset}>다시 시도</button>
-        </div>
-      )}
+    <ErrorBoundary
+      FallbackComponent={ErrorFallback}
+      onError={handleError}
     >
       <MyPage />
-    </ResilioBoundary>
+    </ErrorBoundary>
   );
 }
 ```
+
+#### 🚨 Telemetry 소유권 규칙 (Telemetry Ownership Rules)
+React 19의 Root Handler(`createResilioRootHandlers`)와 `ErrorBoundary`를 동시 사용할 경우 에러가 중복 수집되는 문제가 발생할 수 있습니다. **하나의 에러 발생 전파 경로 상에서는 단 하나의 telemetry 소유권만 동작해야 합니다.**
+* `react-error-boundary`를 사용하여 Boundary 레벨에서 `onError={handleError}`로 telemetry를 포착하는 경우, React 19 Root Handler(`onCaughtError` 등)에서는 해당 에러를 중복 보고하지 않도록 주의하십시오.
+
 
 ### 4. Result 타입 활용
 
