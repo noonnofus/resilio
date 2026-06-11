@@ -1,5 +1,8 @@
 import { isRetryableError } from './normalize.js';
 
+/**
+ * @deprecated 이 인터페이스는 레거시 재시도 정책 정의용입니다.
+ */
 export interface RetryPolicy {
   maxAttempts: number;
   delayMs: number;
@@ -7,6 +10,9 @@ export interface RetryPolicy {
   shouldRetry?: (error: unknown) => boolean;
 }
 
+/**
+ * @deprecated 이 상수는 레거시 기본 재시도 정책입니다.
+ */
 export const DEFAULT_RETRY_POLICY: RetryPolicy = {
   maxAttempts: 3,
   delayMs: 1000,
@@ -14,6 +20,9 @@ export const DEFAULT_RETRY_POLICY: RetryPolicy = {
   shouldRetry: isRetryableError,
 };
 
+/**
+ * @deprecated 이 함수는 레거시 재시도 실행 헬퍼입니다.
+ */
 export async function withRetry<T>(
   fn: () => Promise<T>,
   policy: Partial<RetryPolicy> = {}
