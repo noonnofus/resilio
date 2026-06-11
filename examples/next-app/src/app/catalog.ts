@@ -1,4 +1,8 @@
-import { defineErrorCatalog, defineErrorPolicy } from '@resilio/next';
+import {
+  defineErrorCatalog,
+  defineErrorPolicy,
+  definePresentationPolicy,
+} from '@resilio/next';
 import * as z from 'zod';
 
 export const appCatalog = defineErrorCatalog({
@@ -26,4 +30,27 @@ export const appPolicy = defineErrorPolicy(appCatalog, {
     severity: 'warning',
     message: (p) => `${p.retryAfter}초 후 다시 시도해 주세요.`,
   },
+});
+
+export const appPresentationPolicy = definePresentationPolicy(appCatalog, {
+  VALIDATION_ERROR: [
+    {
+      decide: () => ({
+        channel: 'inline',
+        severity: 'error',
+        messageKey: '이름은 최소 2글자 이상이어야 합니다.',
+        target: 'name',
+      }),
+    },
+  ],
+  RATE_LIMIT_ERROR: [
+    {
+      decide: ({ error }) => ({
+        channel: 'modal',
+        severity: 'warning',
+        messageKey: `${error.params.retryAfter}초 후 다시 시도해 주세요.`,
+        dedupeWindowMs: 1_000,
+      }),
+    },
+  ],
 });

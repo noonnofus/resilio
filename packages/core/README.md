@@ -1,5 +1,7 @@
 # @resilio/core
 
-Framework-independent typed error catalog, runtime decoder, policy engine, dedupe store, and telemetry sink contracts for Resilio.
+Framework-independent public error catalog, runtime decoder, exhaustive
+presentation policy, multi-decision plans, per-decision dedupe, and optional
+observation events.
 
-See the repository README for usage and API documentation.
+See the repository [README](../../README.md) and [v1 API](../../docs/v1-api.md).

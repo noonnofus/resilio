@@ -1,12 +1,20 @@
 'use client';
 
-import { useResilioState } from '@resilio/next/client';
+import {
+  createPublicError,
+  usePresentError,
+  useResilioInline,
+  useResilioState,
+} from '@resilio/next/client';
 import { appCatalog } from './catalog';
 import { updateProfile } from './actions';
 
 export function ProfileForm() {
+  const present = usePresentError();
+  const nameError = useResilioInline({ surface: 'profile-form', target: 'name' });
   const [state, action, pending] = useResilioState(updateProfile, {
     catalog: appCatalog,
+    presentation: { surface: 'profile-form' },
   });
 
   return (
@@ -16,7 +24,16 @@ export function ProfileForm() {
       <button disabled={pending} type="submit">
         {pending ? 'Saving...' : 'Save'}
       </button>
-      {!state.ok && <p role="alert">입력 내용을 확인해 주세요.</p>}
+      <button
+        onClick={() => void present(
+          createPublicError(appCatalog, 'RATE_LIMIT_ERROR', { retryAfter: 5 }),
+          { source: 'manual', surface: 'profile-form', interaction: 'foreground' },
+        )}
+        type="button"
+      >
+        Show custom modal
+      </button>
+      {nameError && <p role="alert">{nameError.decision.messageKey}</p>}
       {state.ok && state.data && <p>Saved: {state.data.savedName}</p>}
     </form>
   );

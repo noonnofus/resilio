@@ -1,5 +1,7 @@
 # @resilio/react
 
-React 19 provider, reporting hooks, root error handlers, and Error Boundary bridge for Resilio.
+React provider, headless presentation host, custom renderer registry, inline
+consumer hook, Error Boundary, root handlers, and explicit exception bridges.
 
-See the repository README for usage and API documentation.
+Actual toast, modal, banner, and form components remain owned by the app.
+See the repository [README](../../README.md).

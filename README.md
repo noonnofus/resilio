@@ -1,281 +1,174 @@
 # Resilio
 
-React & Next.js 환경에서 파편화된 에러 처리 흐름을 하나의 일관된 타입/API로 통합하는 Headless 에러 핸들링 라이브러리입니다.
+Resilio is a typed Error Presentation Policy Layer for React, Next.js, and TanStack.
+It decodes safe public errors and turns them into headless UI decisions such as
+`inline`, `toast`, `modal`, `banner`, or project-defined channels.
 
-**패키지 1개 설치, Provider 1개 감싸기.** 그게 전부입니다.
+Resilio does not own fetching, retry, navigation, validation timing, or actual UI
+components. Unexpected exceptions remain in the framework fallback path and can
+optionally be reported through observability bridges.
 
----
+## Packages
 
-## 설치
+| Package | Purpose |
+|---|---|
+| `@resilio/core` | Catalog, runtime decoder, exhaustive policy, plans, dedupe |
+| `@resilio/react` | Provider, hosts, renderers, boundary, capture bridges |
+| `@resilio/next` | Server/client facade, Server Action and route bridges |
+| `@resilio/tanstack` | Query, Router, and Form lifecycle adapters |
 
-```bash
-# Next.js 프로젝트
-npm install @resilio/next
-
-# React 프로젝트 (Vite, CRA 등)
-npm install @resilio/react
-```
-
----
-
-## Quick Start — Next.js
-
-### 1. Provider 감싸기
-
-`layout.tsx`의 `<body>` 안에 하나만 감싸면 됩니다.
-
-```tsx
-// app/layout.tsx
-import { ResilioProvider } from '@resilio/next/client';
-
-export default function RootLayout({ children }) {
-  return (
-    <html lang="ko">
-      <body>
-        <ResilioProvider
-          onUserFacingError={(error) => toast.error(error.message)}
-        >
-          {children}
-        </ResilioProvider>
-      </body>
-    </html>
-  );
-}
-```
-
-### 2. Server Action 작성
+## Core Policy
 
 ```ts
-// app/actions.ts
-'use server';
+import {
+  createPresentationEvaluator,
+  defineErrorCatalog,
+  definePresentationPolicy,
+} from '@resilio/core';
+import * as z from 'zod';
 
-import { createResilioAction, ok, err } from '@resilio/next';
+const catalog = defineErrorCatalog({
+  EMAIL_TAKEN: { params: z.object({ email: z.string().email() }) },
+  SESSION_EXPIRED: {},
+});
 
-export const updateUser = createResilioAction(async (_prev, formData: FormData) => {
-  const name = formData.get('name');
+const policy = definePresentationPolicy(catalog, {
+  EMAIL_TAKEN: [{
+    decide: () => ({
+      primary: {
+        channel: 'inline',
+        severity: 'error',
+        messageKey: 'errors.emailTaken',
+        target: 'email',
+      },
+      supplements: [{
+        channel: 'banner',
+        severity: 'warning',
+        messageKey: 'errors.reviewForm',
+      }],
+    }),
+  }],
+  SESSION_EXPIRED: [{
+    decide: () => ({
+      channel: 'modal',
+      severity: 'error',
+      messageKey: 'errors.sessionExpired',
+    }),
+  }],
+});
 
-  // 실패 → err()로 반환 (throw 안 함)
-  if (!name || name.length < 2) {
-    return err({
-      kind: 'validation',
-      message: '이름은 2글자 이상이어야 합니다.',
-      fields: { name: ['2글자 이상 입력해 주세요.'] },
-      presentation: 'inline',
-    });
-  }
-
-  await db.user.update({ name });
-
-  // 성공 → ok()로 반환
-  return ok({ message: '저장 완료' });
+export const evaluator = createPresentationEvaluator({
+  catalog,
+  policy,
+  fallback: () => ({
+    channel: 'silent',
+    severity: 'error',
+    messageKey: 'errors.fallback',
+  }),
 });
 ```
 
-### 3. Client Component에서 사용
+## React
 
 ```tsx
-// app/page.tsx
-'use client';
+import {
+  ResilioPresentationHost,
+  ResilioProvider,
+  usePresentError,
+} from '@resilio/react';
 
-import { useActionState } from 'react';
-import { updateUser } from './actions';
-import { useResilio, toActionState } from '@resilio/next/client';
-
-export default function ProfileForm() {
-  const [state, action, pending] = useActionState(updateUser, toActionState(null));
-  const { report } = useResilio();
-
+function Root({ children }: { children: React.ReactNode }) {
   return (
-    <form action={action}>
-      <input name="name" />
-
-      {/* Inline 에러 표시 */}
-      {!state.ok && state.error?.fields?.name?.[0] && (
-        <p className="text-red-500">{state.error.fields.name[0]}</p>
-      )}
-
-      <button disabled={pending}>저장</button>
-    </form>
+    <ResilioProvider evaluator={evaluator}>
+      {children}
+      <ResilioPresentationHost>
+        {({ active, dismiss }) => active.map((item) => (
+          <YourProjectUI
+            key={item.id}
+            decision={item.decision}
+            onClose={() => dismiss(item.id)}
+          />
+        ))}
+      </ResilioPresentationHost>
+    </ResilioProvider>
   );
 }
-```
-
-### 4. error.tsx 연동
-
-Unexpected 오류는 Next.js의 `error.tsx`로 자동 전달됩니다.
-
-```tsx
-// app/error.tsx
-'use client';
-
-import { useEffect } from 'react';
-import { reportRouteError } from '@resilio/next/client';
-
-export default function ErrorPage({ error, reset }) {
-  useEffect(() => {
-    reportRouteError(error, { digest: error.digest });
-  }, [error]);
-
-  return (
-    <div>
-      <h2>문제가 발생했습니다.</h2>
-      <button onClick={reset}>재시도</button>
-    </div>
-  );
-}
-```
-
-### Next.js import 규칙
-
-| 파일 위치 | import 경로 |
-|---|---|
-| Server Action, Server Component | `@resilio/next` |
-| Client Component (`'use client'`) | `@resilio/next/client` |
-
----
-
-## Quick Start — React (Vite, CRA 등)
-
-### 1. Provider 감싸기
-
-`main.tsx`에서 앱 전체를 한 번만 감싸면 됩니다.
-
-```tsx
-// main.tsx
-import { createRoot } from 'react-dom/client';
-import { ResilioProvider } from '@resilio/react';
-import App from './App';
-
-createRoot(document.getElementById('root')!).render(
-  <ResilioProvider
-    onUserFacingError={(error) => toast.error(error.message)}
-  >
-    <App />
-  </ResilioProvider>
-);
-```
-
-### 2. 에러 보고
-
-```tsx
-import { useResilio } from '@resilio/react';
 
 function SaveButton() {
-  const { report } = useResilio();
-
-  const handleSave = async () => {
-    try {
-      await saveData();
-    } catch (error) {
-      report(error); // → Provider의 onUserFacingError로 전달
-    }
-  };
-
-  return <button onClick={handleSave}>저장</button>;
+  const present = usePresentError();
+  return <button onClick={() => void present(publicError, { source: 'manual' })}>Save</button>;
 }
 ```
 
-### 3. Error Boundary (react-error-boundary 연동)
+Use `ResilioErrorBoundary`, `createResilioRootHandlers`, `capture`,
+`captureAsync`, `useResilioHandler`, and `useResilioBrowserErrorBridge` only at
+the explicit capture points you want to observe. They do not convert exceptions
+into public UI decisions.
 
-`@resilio/react`는 독자적인 Error Boundary 컴포넌트를 제공하지 않습니다. 사용자 앱에 설치한 `react-error-boundary`와 bridge hook을 연동합니다.
+## Next.js
 
-`useResilioErrorBoundaryHandler` 훅을 사용해 포착된 예외를 Resilio Telemetry로 즉시 전송할 수 있습니다.
+Server Actions return a safe `PublicActionResult`. `useResilioState` decodes a
+failure and automatically dispatches it to the presentation policy.
 
 ```tsx
-import { ErrorBoundary } from 'react-error-boundary';
-import { useResilioErrorBoundaryHandler } from '@resilio/react';
+'use client';
 
-function App() {
-  const handleError = useResilioErrorBoundaryHandler({ boundary: 'app' });
-
-  return (
-    <ErrorBoundary
-      FallbackComponent={ErrorFallback}
-      onError={handleError}
-    >
-      <MyPage />
-    </ErrorBoundary>
-  );
-}
-```
-
-#### 🚨 Telemetry 소유권 규칙 (Telemetry Ownership Rules)
-React 19의 Root Handler(`createResilioRootHandlers`)와 `ErrorBoundary`를 동시 사용할 경우 에러가 중복 수집되는 문제가 발생할 수 있습니다. **하나의 에러 발생 전파 경로 상에서는 단 하나의 telemetry 소유권만 동작해야 합니다.**
-* `react-error-boundary`를 사용하여 Boundary 레벨에서 `onError={handleError}`로 telemetry를 포착하는 경우, React 19 Root Handler(`onCaughtError` 등)에서는 해당 에러를 중복 보고하지 않도록 주의하십시오.
-
-
-### 4. Result 타입 활용
-
-```tsx
-import { ok, err, type Result } from '@resilio/react';
-
-async function validateForm(data: FormData): Result<User> {
-  const email = data.get('email');
-  if (!email) return err({ kind: 'validation', message: '이메일을 입력하세요.' });
-  return ok({ email });
-}
-```
-
-React에서는 **전부 `@resilio/react`에서 import**합니다. 별도 패키지가 필요 없습니다.
-
----
-
-## 핵심 규칙
-
-| 상황 | 처리 |
-|---|---|
-| 사용자가 고칠 수 있는 실패 (validation, 권한 등) | `return err(...)` |
-| 시스템 장애 (DB 다운, 버그) | 그냥 `throw` → Error Boundary가 잡음 |
-
----
-
-## API Reference
-
-### `Result<T, E>`
-
-```ts
-type Result<T, E = ResilioError> =
-  | { ok: true; data: T }
-  | { ok: false; error: E };
-```
-
-### `ResilioError`
-
-```ts
-interface ResilioError {
-  kind: 'validation' | 'authorization' | 'network' | 'rate_limit' | 'server' | 'unknown';
-  message: string;
-  code?: string;
-  fields?: Record<string, string[]>;
-  retryable?: boolean;
-  presentation?: 'inline' | 'toast' | 'modal' | 'boundary';
-}
-```
-
-### `withRetry<T>`
-
-```ts
-import { withRetry } from '@resilio/react'; // 또는 '@resilio/next'
-
-const data = await withRetry(() => fetchData(), {
-  maxAttempts: 3,
-  delayMs: 1000,
-  backoffFactor: 2,
+const [state, action, pending] = useResilioState(updateProfile, {
+  catalog,
+  presentation: { surface: 'profile-form' },
 });
+
+return <form action={action}>{/* project UI */}</form>;
 ```
 
----
+Connect a route segment fallback without replacing Next.js reset or masking:
 
-## 보안
+```tsx
+'use client';
 
-> [!IMPORTANT]
-> 서버 오류 원문과 stack trace를 클라이언트에 노출하지 마십시오.
-> `createResilioAction`은 Unexpected 오류 발생 시 자동으로 민감 정보를 제거한 뒤 클라이언트에 전달합니다.
+import { useResilioRouteError } from '@resilio/next/client';
 
----
+export default function ErrorPage({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string };
+  reset: () => void;
+}) {
+  const route = useResilioRouteError(error, reset);
+  return <button onClick={route.reset} disabled={route.resetBlocked}>Retry</button>;
+}
+```
 
-## 지원 환경
+Use `createResilioOnRequestError` in `instrumentation.ts` for server request
+observability. Resilio does not intercept `redirect()`, `notFound()`, or
+unexpected Server Action throws.
 
-- **React**: `>=18.3 <20`
-- **Next.js**: `>=15 <17` (App Router & Server Action)
-- **Node.js**: `>=18`
+## TanStack
+
+```ts
+import { QueryCache, MutationCache } from '@tanstack/react-query';
+import {
+  createResilioMutationCacheCallbacks,
+  createResilioQueryCacheCallbacks,
+} from '@resilio/tanstack/query';
+
+const queryCache = new QueryCache(createResilioQueryCacheCallbacks({ present }));
+const mutationCache = new MutationCache(createResilioMutationCacheCallbacks({ present }));
+```
+
+Router and Form adapters are exported from `@resilio/tanstack/router` and
+`@resilio/tanstack/form`.
+
+## Documentation
+
+- [Capture Matrix](docs/capture-matrix.md)
+- [v1 API and recipes](docs/v1-api.md)
+- [Migration guide](docs/migration-v1.md)
+- [TanStack compatibility](docs/tanstack-compatibility.md)
+
+## Support
+
+- React: `>=18.3 <20`
+- Next.js: `>=15 <17`
+- Node.js: `>=18`

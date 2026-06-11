@@ -12,4 +12,8 @@ coverage/
 playwright-report/
 test-results/
 .serena/
-docs/
+docs/*
+!docs/capture-matrix.md
+!docs/migration-v1.md
+!docs/tanstack-compatibility.md
+!docs/v1-api.md
