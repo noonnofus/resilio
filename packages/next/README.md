@@ -1,4 +1,4 @@
-# @resilio/next
+# @resiliojs/next
 
 Next.js facade for Resilio. Includes the React and Core APIs plus Server Action
 and App Router integrations.
@@ -6,16 +6,16 @@ and App Router integrations.
 ## Install
 
 ```bash
-pnpm add @resilio/next
+pnpm add @resiliojs/next
 ```
 
-Use `@resilio/next` in Server Components and Server Actions. Use
-`@resilio/next/client` in Client Components.
+Use `@resiliojs/next` in Server Components and Server Actions. Use
+`@resiliojs/next/client` in Client Components.
 
 ```tsx
 'use client';
 
-import { useResilioState } from '@resilio/next/client';
+import { useResilioState } from '@resiliojs/next/client';
 
 const [state, action, pending] = useResilioState(updateProfile, {
   catalog,

@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useOptionalReportError } from '@resilio/react';
+import { useOptionalReportError } from '@resiliojs/react';
 
 export interface UseResilioRouteErrorOptions {
   maxResets?: number;

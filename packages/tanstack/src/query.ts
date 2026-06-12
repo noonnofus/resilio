@@ -1,4 +1,4 @@
-import type { PresentationContext } from '@resilio/core';
+import type { PresentationContext } from '@resiliojs/core';
 import {
   dispatchTanStackError,
   type TanStackPresentationOptions,

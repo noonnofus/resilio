@@ -36,7 +36,7 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @resilio/next add --save-dev next@${{ matrix.next-version }} --lockfile=false
+      - run: pnpm --filter @resiliojs/next add --save-dev next@${{ matrix.next-version }} --lockfile=false
       - run: pnpm build
-      - run: pnpm --filter @resilio/next typecheck
-      - run: pnpm --filter @resilio/next test
+      - run: pnpm --filter @resiliojs/next typecheck
+      - run: pnpm --filter @resiliojs/next test

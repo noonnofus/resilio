@@ -1,5 +1,5 @@
 {
-  "name": "@resilio/react",
+  "name": "@resiliojs/react",
   "version": "0.1.0",
   "description": "Headless React bindings for typed error presentation policies",
   "license": "MIT",
@@ -43,7 +43,7 @@
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
-    "@resilio/core": "workspace:^"
+    "@resiliojs/core": "workspace:^"
   },
   "peerDependencies": {
     "react": ">=18.3 <20",

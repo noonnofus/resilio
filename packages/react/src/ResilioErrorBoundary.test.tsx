@@ -2,7 +2,7 @@
 import React from 'react';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { PolicyEngine, defineErrorCatalog, defineErrorPolicy } from '@resilio/core';
+import { PolicyEngine, defineErrorCatalog, defineErrorPolicy } from '@resiliojs/core';
 import { ResilioErrorBoundary } from './ResilioErrorBoundary.js';
 import { ResilioProvider } from './ResilioProvider.js';
 

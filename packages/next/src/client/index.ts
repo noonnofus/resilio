@@ -1,6 +1,6 @@
 'use client';
 
-// Re-export all React client components from @resilio/react
+// Re-export all React client components from @resiliojs/react
 export {
   ResilioProvider,
   ResilioErrorBoundary,
@@ -16,7 +16,7 @@ export {
   useResilioHandler,
   installResilioBrowserErrorBridge,
   useResilioBrowserErrorBridge,
-} from '@resilio/react';
+} from '@resiliojs/react';
 export type {
   ActivePresentation,
   FeedbackAdapter,
@@ -29,10 +29,10 @@ export type {
   ResilioPresentationHostProps,
   ResilioPresentationProviderProps,
   ResilioProviderProps,
-} from '@resilio/react';
+} from '@resiliojs/react';
 
-export { useResilio, useReportError } from '@resilio/react';
-export { useOptionalReportError } from '@resilio/react';
+export { useResilio, useReportError } from '@resiliojs/react';
+export { useOptionalReportError } from '@resiliojs/react';
 
 // Re-export client-safe utilities from core
 export { 
@@ -54,7 +54,7 @@ export {
   BoundedDedupeStore,
   definePresentationPolicy,
   createPresentationEvaluator
-} from '@resilio/core';
+} from '@resiliojs/core';
 
 export type { 
   Result, 
@@ -92,7 +92,7 @@ export type {
   PresentationEvaluatorOptions,
   PresentationObservationEvent,
   PresentationObserver
-} from '@resilio/core';
+} from '@resiliojs/core';
 
 // Re-export Next.js client helpers
 export { toActionState } from '../action-state.js';

@@ -4,7 +4,7 @@ import {
   createPresentationEvaluator,
   defineErrorCatalog,
   definePresentationPolicy,
-} from '@resilio/core';
+} from '@resiliojs/core';
 import { createResilioFormErrorMapper, createResilioFormValidator } from './form.js';
 
 const catalog = defineErrorCatalog({

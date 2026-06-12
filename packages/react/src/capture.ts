@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useContext } from 'react';
-import type { ErrorSource } from '@resilio/core';
+import type { ErrorSource } from '@resiliojs/core';
 import { ResilioContext } from './ResilioProvider.js';
 
 export interface CaptureExceptionOptions {

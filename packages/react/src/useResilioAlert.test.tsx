@@ -4,9 +4,9 @@ import React from 'react';
 import { render, cleanup } from '@testing-library/react';
 import { ResilioProvider } from './ResilioProvider.js';
 import { useResilioAlert } from './useResilioAlert.js';
-import { Result, err, ok } from '@resilio/core';
+import { Result, err, ok } from '@resiliojs/core';
 import * as z from 'zod';
-import { defineErrorCatalog, PolicyEngine, defineErrorPolicy } from '@resilio/core';
+import { defineErrorCatalog, PolicyEngine, defineErrorPolicy } from '@resiliojs/core';
 
 afterEach(() => {
   cleanup();

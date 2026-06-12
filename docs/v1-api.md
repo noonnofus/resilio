@@ -28,17 +28,17 @@ same error occurrence.
 
 ## Next.js
 
-- Server imports: `@resilio/next`
-- Client imports: `@resilio/next/client`
+- Server imports: `@resiliojs/next`
+- Client imports: `@resiliojs/next/client`
 - `useResilioState`: automatic expected-error decode and presentation dispatch.
 - `useResilioRouteError`: route fallback observation and reset-loop guard.
 - `createResilioOnRequestError`: `instrumentation.ts` server observability.
 
 ## TanStack
 
-- `@resilio/tanstack/query`: QueryCache and MutationCache callbacks.
-- `@resilio/tanstack/router`: lifecycle handlers for loader/onCatch/error UI.
-- `@resilio/tanstack/form`: presentation-to-field/form mapper and validator.
+- `@resiliojs/tanstack/query`: QueryCache and MutationCache callbacks.
+- `@resiliojs/tanstack/router`: lifecycle handlers for loader/onCatch/error UI.
+- `@resiliojs/tanstack/form`: presentation-to-field/form mapper and validator.
 
 Every adapter preserves the host framework’s retry, navigation, reset, and
 validation ownership.

@@ -31,16 +31,16 @@ Choose the package matching your application:
 
 ```bash
 # Next.js: includes the React and Core APIs
-pnpm add @resilio/next
+pnpm add @resiliojs/next
 
 # React without Next.js
-pnpm add @resilio/react
+pnpm add @resiliojs/react
 
 # Framework-independent policy engine
-pnpm add @resilio/core
+pnpm add @resiliojs/core
 
 # TanStack Query, Router, and Form adapters
-pnpm add @resilio/tanstack
+pnpm add @resiliojs/tanstack
 ```
 
 ## Define a Policy
@@ -50,7 +50,7 @@ import {
   createPresentationEvaluator,
   defineErrorCatalog,
   definePresentationPolicy,
-} from '@resilio/core';
+} from '@resiliojs/core';
 import * as z from 'zod';
 
 export const catalog = defineErrorCatalog({
@@ -103,7 +103,7 @@ import {
   ResilioPresentationHost,
   ResilioProvider,
   usePresentError,
-} from '@resilio/react';
+} from '@resiliojs/react';
 
 function AppProvider({ children }: { children: React.ReactNode }) {
   return (
@@ -140,7 +140,7 @@ expected failures and automatically dispatches them to the policy.
 ```tsx
 'use client';
 
-import { useResilioState } from '@resilio/next/client';
+import { useResilioState } from '@resiliojs/next/client';
 
 const [state, action, pending] = useResilioState(updateProfile, {
   catalog,
@@ -160,23 +160,23 @@ import { MutationCache, QueryCache } from '@tanstack/react-query';
 import {
   createResilioMutationCacheCallbacks,
   createResilioQueryCacheCallbacks,
-} from '@resilio/tanstack/query';
+} from '@resiliojs/tanstack/query';
 
 const queryCache = new QueryCache(createResilioQueryCacheCallbacks({ present }));
 const mutationCache = new MutationCache(createResilioMutationCacheCallbacks({ present }));
 ```
 
-Router and Form adapters are available from `@resilio/tanstack/router` and
-`@resilio/tanstack/form`.
+Router and Form adapters are available from `@resiliojs/tanstack/router` and
+`@resiliojs/tanstack/form`.
 
 ## Package Guide
 
 | Package | Use it when |
 |---|---|
-| [`@resilio/core`](https://www.npmjs.com/package/@resilio/core) | You need the framework-independent catalog and evaluator |
-| [`@resilio/react`](https://www.npmjs.com/package/@resilio/react) | You need React hosts, renderers, boundaries, or capture bridges |
-| [`@resilio/next`](https://www.npmjs.com/package/@resilio/next) | You use Next.js App Router or Server Actions |
-| [`@resilio/tanstack`](https://www.npmjs.com/package/@resilio/tanstack) | You use TanStack Query, Router, or Form |
+| [`@resiliojs/core`](https://www.npmjs.com/package/@resiliojs/core) | You need the framework-independent catalog and evaluator |
+| [`@resiliojs/react`](https://www.npmjs.com/package/@resiliojs/react) | You need React hosts, renderers, boundaries, or capture bridges |
+| [`@resiliojs/next`](https://www.npmjs.com/package/@resiliojs/next) | You use Next.js App Router or Server Actions |
+| [`@resiliojs/tanstack`](https://www.npmjs.com/package/@resiliojs/tanstack) | You use TanStack Query, Router, or Form |
 
 ## What Resilio Does Not Own
 

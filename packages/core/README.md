@@ -1,11 +1,11 @@
-# @resilio/core
+# @resiliojs/core
 
 Framework-independent typed error presentation policy engine.
 
 ## Install
 
 ```bash
-pnpm add @resilio/core
+pnpm add @resiliojs/core
 ```
 
 ## What It Provides
@@ -21,7 +21,7 @@ import {
   createPresentationEvaluator,
   defineErrorCatalog,
   definePresentationPolicy,
-} from '@resilio/core';
+} from '@resiliojs/core';
 
 const policy = definePresentationPolicy(catalog, {
   SESSION_EXPIRED: [{

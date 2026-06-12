@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { PolicyEngine, defineErrorCatalog, defineErrorPolicy } from '@resilio/core';
+import { PolicyEngine, defineErrorCatalog, defineErrorPolicy } from '@resiliojs/core';
 import { createResilioRootHandlers } from './root-handlers.js';
 
 describe('createResilioRootHandlers', () => {

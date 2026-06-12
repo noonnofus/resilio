@@ -2,7 +2,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import React, { startTransition } from 'react';
 import { render, screen, act, cleanup } from '@testing-library/react';
-import { ResilioPresentationHost, ResilioProvider } from '@resilio/react';
+import { ResilioPresentationHost, ResilioProvider } from '@resiliojs/react';
 import { useResilioState, type ResilioActionState } from './useResilioState.js';
 import * as z from 'zod';
 import {
@@ -12,7 +12,7 @@ import {
   PolicyEngine,
   defineErrorPolicy,
   PublicActionResult,
-} from '@resilio/next';
+} from '@resiliojs/next';
 
 afterEach(() => {
   cleanup();

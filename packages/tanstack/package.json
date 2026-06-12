@@ -1,5 +1,5 @@
 {
-  "name": "@resilio/tanstack",
+  "name": "@resiliojs/tanstack",
   "version": "0.1.0",
   "description": "Typed error presentation adapters for TanStack Query, Router, and Form",
   "license": "MIT",
@@ -59,7 +59,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@resilio/core": "workspace:^"
+    "@resiliojs/core": "workspace:^"
   },
   "peerDependencies": {
     "@tanstack/form-core": ">=1 <2",

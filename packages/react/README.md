@@ -1,11 +1,11 @@
-# @resilio/react
+# @resiliojs/react
 
 Headless React bindings for Resilio typed error presentation policies.
 
 ## Install
 
 ```bash
-pnpm add @resilio/react
+pnpm add @resiliojs/react
 ```
 
 ## What It Provides

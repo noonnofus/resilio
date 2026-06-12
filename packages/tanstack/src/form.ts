@@ -3,7 +3,7 @@ import type {
   PresentationContext,
   PresentationDecision,
   PresentationEvaluator,
-} from '@resilio/core';
+} from '@resiliojs/core';
 
 export interface TanStackFormError {
   form?: string;

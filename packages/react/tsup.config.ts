@@ -7,5 +7,5 @@ export default defineConfig({
   sourcemap: true,
   clean: true,
   splitting: false,
-  external: ['react', 'react-dom', '@resilio/core'],
+  external: ['react', 'react-dom', '@resiliojs/core'],
 })

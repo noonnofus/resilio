@@ -2,7 +2,7 @@
 
 import { useContext } from 'react';
 import { ResilioContext } from './ResilioProvider.js';
-import type { ErrorCatalog, PublicError, PublicErrorValue, ErrorSource } from '@resilio/core';
+import type { ErrorCatalog, PublicError, PublicErrorValue, ErrorSource } from '@resiliojs/core';
 
 export function useResilio() {
   const context = useContext(ResilioContext);

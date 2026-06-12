@@ -2,7 +2,7 @@
 import React from 'react';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { PolicyEngine, ResilioProvider, defineErrorCatalog, defineErrorPolicy } from '@resilio/react';
+import { PolicyEngine, ResilioProvider, defineErrorCatalog, defineErrorPolicy } from '@resiliojs/react';
 import { useResilioRouteError } from './useResilioRouteError.js';
 
 afterEach(cleanup);

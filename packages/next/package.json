@@ -1,5 +1,5 @@
 {
-  "name": "@resilio/next",
+  "name": "@resiliojs/next",
   "version": "0.1.0",
   "description": "Next.js facade for typed public errors and presentation policies",
   "license": "MIT",
@@ -49,8 +49,8 @@
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
-    "@resilio/core": "workspace:^",
-    "@resilio/react": "workspace:^"
+    "@resiliojs/core": "workspace:^",
+    "@resiliojs/react": "workspace:^"
   },
   "peerDependencies": {
     "next": ">=15 <17",

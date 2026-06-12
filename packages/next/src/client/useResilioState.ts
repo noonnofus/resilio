@@ -1,14 +1,14 @@
 'use client';
 
 import { useActionState } from 'react';
-import { useOptionalPresentError, useOptionalReportError } from '@resilio/react';
-import { decodePublicError } from '@resilio/core';
+import { useOptionalPresentError, useOptionalReportError } from '@resiliojs/react';
+import { decodePublicError } from '@resiliojs/core';
 import type {
   DecodeFailureReason,
   ErrorCatalog,
   PresentationContext,
   PublicError,
-} from '@resilio/core';
+} from '@resiliojs/core';
 import type { PublicActionResult } from '../types.js';
 
 export interface UseResilioStateOptions<TData, TCatalog extends ErrorCatalog> {

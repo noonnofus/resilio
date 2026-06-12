@@ -1,5 +1,5 @@
 {
-  "name": "@resilio/core",
+  "name": "@resiliojs/core",
   "version": "0.1.0",
   "description": "Framework-independent typed error presentation policy engine",
   "license": "MIT",

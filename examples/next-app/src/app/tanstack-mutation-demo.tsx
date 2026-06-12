@@ -1,7 +1,7 @@
 'use client';
 
 import { useMutation } from '@tanstack/react-query';
-import { createPublicError } from '@resilio/next/client';
+import { createPublicError } from '@resiliojs/next/client';
 import { appCatalog } from './catalog';
 
 export function TanStackMutationDemo() {

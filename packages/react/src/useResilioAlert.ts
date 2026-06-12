@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useReportError } from './useResilio.js';
-import type { ErrorCatalog, PublicError, Result } from '@resilio/core';
+import type { ErrorCatalog, PublicError, Result } from '@resiliojs/core';
 
 /**
  * 서버 액션 등의 실행 결과(Result)를 받아 감시하고,

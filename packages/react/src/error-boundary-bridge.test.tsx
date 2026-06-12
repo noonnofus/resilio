@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { renderHook } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import { defineErrorCatalog, defineErrorPolicy, PolicyEngine } from '@resilio/core';
+import { defineErrorCatalog, defineErrorPolicy, PolicyEngine } from '@resiliojs/core';
 import { ResilioProvider } from './ResilioProvider.js';
 import { useResilioErrorBoundaryHandler } from './error-boundary-bridge.js';
 

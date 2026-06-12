@@ -2,7 +2,7 @@ import {
   defineErrorCatalog,
   defineErrorPolicy,
   definePresentationPolicy,
-} from '@resilio/next';
+} from '@resiliojs/next';
 import * as z from 'zod';
 
 export const appCatalog = defineErrorCatalog({

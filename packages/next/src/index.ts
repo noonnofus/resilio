@@ -29,7 +29,7 @@ export {
   BoundedDedupeStore,
   definePresentationPolicy,
   createPresentationEvaluator
-} from '@resilio/core';
+} from '@resiliojs/core';
 
 export type { 
   Result, 
@@ -70,6 +70,6 @@ export type {
   PresentationEvaluatorOptions,
   PresentationObservationEvent,
   PresentationObserver
-} from '@resilio/core';
+} from '@resiliojs/core';
 
-export { ResilioEmitter, globalResilioEmitter, ResilioLogger, resilioLogger, defaultConsoleLogger } from '@resilio/core';
+export { ResilioEmitter, globalResilioEmitter, ResilioLogger, resilioLogger, defaultConsoleLogger } from '@resiliojs/core';

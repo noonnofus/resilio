@@ -12,7 +12,7 @@
     "lint": "eslint . --ext .ts,.tsx",
     "pack:dry": "pnpm -r --filter './packages/*' exec npm pack --dry-run",
     "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm test:e2e && pnpm pack:dry",
-    "publish:preview": "pnpm --filter @resilio/core publish --access public --no-git-checks && pnpm --filter @resilio/react publish --access public --no-git-checks && pnpm --filter @resilio/tanstack publish --access public --no-git-checks && pnpm --filter @resilio/next publish --access public --no-git-checks"
+    "publish:preview": "pnpm --filter @resiliojs/core publish --access public --no-git-checks && pnpm --filter @resiliojs/react publish --access public --no-git-checks && pnpm --filter @resiliojs/tanstack publish --access public --no-git-checks && pnpm --filter @resiliojs/next publish --access public --no-git-checks"
   },
   "devDependencies": {
     "@standard-schema/spec": "^1.1.0",

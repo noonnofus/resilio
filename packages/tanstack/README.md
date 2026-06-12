@@ -1,11 +1,11 @@
-# @resilio/tanstack
+# @resiliojs/tanstack
 
 Typed error presentation adapters for TanStack Query, Router, and Form.
 
 ## Install
 
 ```bash
-pnpm add @resilio/tanstack
+pnpm add @resiliojs/tanstack
 ```
 
 ## Query
@@ -15,7 +15,7 @@ import { MutationCache, QueryCache } from '@tanstack/react-query';
 import {
   createResilioMutationCacheCallbacks,
   createResilioQueryCacheCallbacks,
-} from '@resilio/tanstack/query';
+} from '@resiliojs/tanstack/query';
 
 const queryCache = new QueryCache(createResilioQueryCacheCallbacks({ present }));
 const mutationCache = new MutationCache(createResilioMutationCacheCallbacks({ present }));
@@ -23,9 +23,9 @@ const mutationCache = new MutationCache(createResilioMutationCacheCallbacks({ pr
 
 ## Subpath Exports
 
-- `@resilio/tanstack/query`
-- `@resilio/tanstack/router`
-- `@resilio/tanstack/form`
+- `@resiliojs/tanstack/query`
+- `@resiliojs/tanstack/router`
+- `@resiliojs/tanstack/form`
 
 Adapters preserve TanStack retry, cancellation, navigation, not-found, cache,
 and validation ownership.

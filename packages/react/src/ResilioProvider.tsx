@@ -8,7 +8,7 @@ import type {
   PolicyDecision,
   PresentationEvaluator,
   PublicErrorValue,
-} from '@resilio/core';
+} from '@resiliojs/core';
 import {
   ResilioPresentationProvider,
   type RendererRegistry,

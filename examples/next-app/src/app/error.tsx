@@ -1,6 +1,6 @@
 'use client';
 
-import { useResilioRouteError } from '@resilio/next/client';
+import { useResilioRouteError } from '@resiliojs/next/client';
 
 export default function ErrorPage({
   error,

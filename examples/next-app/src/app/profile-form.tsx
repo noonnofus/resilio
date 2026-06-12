@@ -5,7 +5,7 @@ import {
   usePresentError,
   useResilioInline,
   useResilioState,
-} from '@resilio/next/client';
+} from '@resiliojs/next/client';
 import { appCatalog } from './catalog';
 import { updateProfile } from './actions';
 

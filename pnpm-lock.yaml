@@ -53,10 +53,10 @@ importers:
 
   examples/next-app:
     dependencies:
-      '@resilio/next':
+      '@resiliojs/next':
         specifier: workspace:*
         version: link:../../packages/next
-      '@resilio/tanstack':
+      '@resiliojs/tanstack':
         specifier: workspace:*
         version: link:../../packages/tanstack
       '@tanstack/react-query':
@@ -96,10 +96,10 @@ importers:
 
   packages/next:
     dependencies:
-      '@resilio/core':
+      '@resiliojs/core':
         specifier: workspace:^
         version: link:../core
-      '@resilio/react':
+      '@resiliojs/react':
         specifier: workspace:^
         version: link:../react
     devDependencies:
@@ -118,7 +118,7 @@ importers:
 
   packages/react:
     dependencies:
-      '@resilio/core':
+      '@resiliojs/core':
         specifier: workspace:^
         version: link:../core
     devDependencies:
@@ -137,7 +137,7 @@ importers:
 
   packages/tanstack:
     dependencies:
-      '@resilio/core':
+      '@resiliojs/core':
         specifier: workspace:^
         version: link:../core
       '@tanstack/form-core':

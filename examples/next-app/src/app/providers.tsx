@@ -2,7 +2,7 @@
 
 import { useMemo, type ReactNode } from 'react';
 import { MutationCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { createResilioMutationCacheCallbacks } from '@resilio/tanstack/query';
+import { createResilioMutationCacheCallbacks } from '@resiliojs/tanstack/query';
 import {
   PolicyEngine,
   ResilioErrorBoundary,
@@ -10,7 +10,7 @@ import {
   ResilioProvider,
   createPresentationEvaluator,
   usePresentError,
-} from '@resilio/next/client';
+} from '@resiliojs/next/client';
 import { appCatalog, appPolicy, appPresentationPolicy } from './catalog';
 
 export function Providers({ children }: { children: ReactNode }) {

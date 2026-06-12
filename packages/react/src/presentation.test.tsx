@@ -7,7 +7,7 @@ import {
   createPresentationEvaluator,
   defineErrorCatalog,
   definePresentationPolicy,
-} from '@resilio/core';
+} from '@resiliojs/core';
 import { ResilioProvider } from './ResilioProvider.js';
 import {
   ResilioPresentationHost,

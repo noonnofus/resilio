@@ -10,5 +10,5 @@ export default defineConfig({
   sourcemap: true,
   clean: true,
   splitting: false,
-  external: ['next', 'react', 'react-dom', '@resilio/core', '@resilio/react'],
+  external: ['next', 'react', 'react-dom', '@resiliojs/core', '@resiliojs/react'],
 })

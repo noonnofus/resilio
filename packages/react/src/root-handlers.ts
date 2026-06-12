@@ -1,4 +1,4 @@
-import type { ErrorCatalog, PolicyEngine } from '@resilio/core';
+import type { ErrorCatalog, PolicyEngine } from '@resiliojs/core';
 import { markExceptionReported } from './exception-dedupe.js';
 import type { RootOptions } from 'react-dom/client';
 
