@@ -1,7 +1,39 @@
 # @resilio/react
 
-React provider, headless presentation host, custom renderer registry, inline
-consumer hook, Error Boundary, root handlers, and explicit exception bridges.
+Headless React bindings for Resilio typed error presentation policies.
 
-Actual toast, modal, banner, and form components remain owned by the app.
-See the repository [README](../../README.md).
+## Install
+
+```bash
+pnpm add @resilio/react
+```
+
+## What It Provides
+
+- `ResilioProvider`
+- `ResilioPresentationHost` and custom renderer registry
+- `usePresentError` and `useResilioInline`
+- Multi-surface presentation and occurrence-level dismiss
+- `ResilioErrorBoundary` and React root handlers
+- Explicit `capture`, `captureAsync`, and browser observability bridges
+
+```tsx
+<ResilioProvider evaluator={evaluator}>
+  <App />
+  <ResilioPresentationHost>
+    {({ active, dismiss }) => active.map((item) => (
+      <ProjectErrorUI
+        key={item.id}
+        decision={item.decision}
+        onClose={() => dismiss(item.id)}
+      />
+    ))}
+  </ResilioPresentationHost>
+</ResilioProvider>
+```
+
+Actual toast, modal, banner, and form components remain owned by your app.
+
+See the [full documentation](https://github.com/noonnofus/resilio#readme).
+
+MIT
