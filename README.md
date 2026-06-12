@@ -192,6 +192,7 @@ Router and Form adapters are available from `@resilio/tanstack/router` and
 - [v1 API and Recipes](https://github.com/noonnofus/resilio/blob/main/docs/v1-api.md)
 - [Migration Guide](https://github.com/noonnofus/resilio/blob/main/docs/migration-v1.md)
 - [TanStack Compatibility](https://github.com/noonnofus/resilio/blob/main/docs/tanstack-compatibility.md)
+- [Publishing Guide](https://github.com/noonnofus/resilio/blob/main/docs/publishing.md)
 
 ## Compatibility
 
