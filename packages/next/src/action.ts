@@ -1,4 +1,4 @@
-import type { ErrorCatalog, ErrorCode } from '@resilio/core';
+import type { ErrorCatalog, ErrorCode } from '@resiliojs/core';
 import type { PublicActionResult } from './types.js';
 
 /**

@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { createResilioAction, isSuccessfulResilioAction } from './action.js';
 import { toActionState } from './action-state.js';
 import * as z from 'zod';
-import { defineErrorCatalog } from '@resilio/core';
+import { defineErrorCatalog } from '@resiliojs/core';
 
 const testCatalog = defineErrorCatalog({
   FAIL_TEST: { params: z.object({ message: z.string() }) },

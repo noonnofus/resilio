@@ -1,6 +1,6 @@
 'use server';
 
-import { createPublicError, type PublicActionResult } from '@resilio/next';
+import { createPublicError, type PublicActionResult } from '@resiliojs/next';
 import { appCatalog } from './catalog';
 
 export type ProfileActionState = PublicActionResult<

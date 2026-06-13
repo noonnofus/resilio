@@ -1,7 +1,18 @@
 'use client';
 
 import React, { createContext } from 'react';
-import type { ErrorCatalog, PolicyEngine, PolicyDecision, PublicErrorValue } from '@resilio/core';
+import type {
+  BuiltInChannel,
+  ErrorCatalog,
+  PolicyEngine,
+  PolicyDecision,
+  PresentationEvaluator,
+  PublicErrorValue,
+} from '@resiliojs/core';
+import {
+  ResilioPresentationProvider,
+  type RendererRegistry,
+} from './presentation.js';
 
 export type FeedbackAdapter = (
   decision: PolicyDecision,
@@ -9,31 +20,51 @@ export type FeedbackAdapter = (
 ) => void;
 
 export interface ResilioContextValue<T extends ErrorCatalog = ErrorCatalog> {
-  engine: PolicyEngine<T>;
+  engine?: PolicyEngine<T>;
   feedback?: FeedbackAdapter;
 }
 
 export const ResilioContext = createContext<ResilioContextValue<ErrorCatalog> | null>(null);
 
-export interface ResilioProviderProps<T extends ErrorCatalog> {
+export interface ResilioProviderProps<
+  T extends ErrorCatalog,
+  TChannel extends string = BuiltInChannel,
+> {
   children: React.ReactNode;
-  engine: PolicyEngine<T>;
+  engine?: PolicyEngine<T>;
   feedback?: FeedbackAdapter;
+  evaluator?: PresentationEvaluator<T, TChannel>;
+  renderers?: RendererRegistry<TChannel>;
 }
 
-export function ResilioProvider<T extends ErrorCatalog>({
+export function ResilioProvider<
+  T extends ErrorCatalog,
+  TChannel extends string = BuiltInChannel,
+>({
   children,
   engine,
   feedback,
-}: ResilioProviderProps<T>) {
-  return (
+  evaluator,
+  renderers,
+}: ResilioProviderProps<T, TChannel>) {
+  const content = (
     <ResilioContext.Provider
       value={{
-        engine: engine as unknown as PolicyEngine<ErrorCatalog>,
+        engine: engine as unknown as PolicyEngine<ErrorCatalog> | undefined,
         feedback,
       }}
     >
       {children}
     </ResilioContext.Provider>
+  );
+
+  if (!evaluator) {
+    return content;
+  }
+
+  return (
+    <ResilioPresentationProvider evaluator={evaluator} renderers={renderers}>
+      {content}
+    </ResilioPresentationProvider>
   );
 }

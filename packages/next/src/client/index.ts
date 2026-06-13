@@ -1,10 +1,38 @@
 'use client';
 
-// Re-export all React client components from @resilio/react
-export { ResilioProvider, useResilioAlert, createResilioRootHandlers } from '@resilio/react';
-export type { ResilioProviderProps, ResilioContextValue, FeedbackAdapter } from '@resilio/react';
+// Re-export all React client components from @resiliojs/react
+export {
+  ResilioProvider,
+  ResilioErrorBoundary,
+  ResilioPresentationHost,
+  ResilioPresentationProvider,
+  usePresentError,
+  useOptionalPresentError,
+  useResilioInline,
+  useResilioAlert,
+  createResilioRootHandlers,
+  capture,
+  captureAsync,
+  useResilioHandler,
+  installResilioBrowserErrorBridge,
+  useResilioBrowserErrorBridge,
+} from '@resiliojs/react';
+export type {
+  ActivePresentation,
+  FeedbackAdapter,
+  PresentationRenderer,
+  PresentationRendererInput,
+  RendererRegistry,
+  ResilioContextValue,
+  ResilioErrorBoundaryProps,
+  ResilioErrorFallbackProps,
+  ResilioPresentationHostProps,
+  ResilioPresentationProviderProps,
+  ResilioProviderProps,
+} from '@resiliojs/react';
 
-export { useResilio, useReportError } from '@resilio/react';
+export { useResilio, useReportError } from '@resiliojs/react';
+export { useOptionalReportError } from '@resiliojs/react';
 
 // Re-export client-safe utilities from core
 export { 
@@ -12,6 +40,7 @@ export {
   err, 
   isOk, 
   isErr, 
+  isPublicResult,
   defineErrorPolicy, 
   shouldSuppress,
   defineErrorCatalog,
@@ -22,11 +51,14 @@ export {
   PolicyEngine,
   canonicalStringify,
   stringHash,
-  BoundedDedupeStore
-} from '@resilio/core';
+  BoundedDedupeStore,
+  definePresentationPolicy,
+  createPresentationEvaluator
+} from '@resiliojs/core';
 
 export type { 
   Result, 
+  PublicResult,
   ResilioError, 
   ResilioErrorKind, 
   ErrorCatalog, 
@@ -45,11 +77,26 @@ export type {
   PolicyDecision,
   DedupeContext,
   DedupePolicy,
-  PolicyEngineOptions
-} from '@resilio/core';
+  PolicyEngineOptions,
+  BuiltInChannel,
+  PresentationContext,
+  PresentationDecision,
+  PresentationPlan,
+  PresentationPlanInput,
+  PresentationRule,
+  PresentationPolicyConfig,
+  EvaluatedPresentationDecision,
+  PresentationInvalidReason,
+  PresentationEvaluationResult,
+  PresentationEvaluator,
+  PresentationEvaluatorOptions,
+  PresentationObservationEvent,
+  PresentationObserver
+} from '@resiliojs/core';
 
 // Re-export Next.js client helpers
 export { toActionState } from '../action-state.js';
 // Export new useResilioState hook
 export * from './useResilioState.js';
+export * from './useResilioRouteError.js';
 export * from '../types.js';

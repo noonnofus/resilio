@@ -1,4 +1,4 @@
-import { createConsoleSink } from '@resilio/next';
-import { createResilioOnRequestError } from '@resilio/next';
+import { createConsoleSink } from '@resiliojs/next';
+import { createResilioOnRequestError } from '@resiliojs/next';
 
 export const onRequestError = createResilioOnRequestError(createConsoleSink());

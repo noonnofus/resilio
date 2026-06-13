@@ -1,4 +1,5 @@
-import type { ErrorCatalog, PolicyEngine } from '@resilio/core';
+import type { ErrorCatalog, PolicyEngine } from '@resiliojs/core';
+import { markExceptionReported } from './exception-dedupe.js';
 import type { RootOptions } from 'react-dom/client';
 
 export type ResilioRootHandlers = Required<
@@ -14,12 +15,15 @@ export function createResilioRootHandlers<T extends ErrorCatalog>(
 ): ResilioRootHandlers {
   return {
     onCaughtError: (error, errorInfo) => {
+      if (!markExceptionReported(error)) return;
       engine.reportException(error, { componentStack: errorInfo.componentStack }, 'react.caught');
     },
     onUncaughtError: (error, errorInfo) => {
+      if (!markExceptionReported(error)) return;
       engine.reportException(error, { componentStack: errorInfo.componentStack }, 'react.uncaught');
     },
     onRecoverableError: (error, errorInfo) => {
+      if (!markExceptionReported(error)) return;
       engine.reportException(error, { componentStack: errorInfo.componentStack }, 'react.recoverable');
     },
   };

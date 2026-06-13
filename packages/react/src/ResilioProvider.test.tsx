@@ -5,7 +5,7 @@ import { render, screen, act, cleanup } from '@testing-library/react';
 import { ResilioProvider } from './ResilioProvider.js';
 import { useReportError } from './useResilio.js';
 import * as z from 'zod';
-import { defineErrorCatalog, PolicyEngine, defineErrorPolicy } from '@resilio/core';
+import { defineErrorCatalog, PolicyEngine, defineErrorPolicy } from '@resiliojs/core';
 
 afterEach(() => {
   cleanup();

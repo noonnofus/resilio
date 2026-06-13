@@ -1,4 +1,4 @@
-import { ResilioError, serializeError } from '@resilio/core';
+import { ResilioError, serializeError } from '@resiliojs/core';
 
 export function sanitizeErrorForClient(
   error: ResilioError,

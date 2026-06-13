@@ -7,7 +7,7 @@ import { useReportError } from './useResilio.js';
  * @example
  * ```tsx
  * import { ErrorBoundary } from 'react-error-boundary';
- * import { useResilioErrorBoundaryHandler } from '@resilio/react';
+ * import { useResilioErrorBoundaryHandler } from '@resiliojs/react';
  * 
  * function App() {
  *   const handleError = useResilioErrorBoundaryHandler();

@@ -2,10 +2,17 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import React, { startTransition } from 'react';
 import { render, screen, act, cleanup } from '@testing-library/react';
-import { ResilioProvider } from '@resilio/react';
+import { ResilioPresentationHost, ResilioProvider } from '@resiliojs/react';
 import { useResilioState, type ResilioActionState } from './useResilioState.js';
 import * as z from 'zod';
-import { defineErrorCatalog, PolicyEngine, defineErrorPolicy, PublicActionResult } from '@resilio/next';
+import {
+  createPresentationEvaluator,
+  defineErrorCatalog,
+  definePresentationPolicy,
+  PolicyEngine,
+  defineErrorPolicy,
+  PublicActionResult,
+} from '@resiliojs/next';
 
 afterEach(() => {
   cleanup();
@@ -174,5 +181,54 @@ describe('useResilioState', () => {
       kind: 'invalid_public_error',
       reason: 'invalid_shape',
     }));
+  });
+
+  it('automatically presents expected action errors without a legacy engine', async () => {
+    const action = async () => ({
+      ok: false as const,
+      error: { code: 'FAIL_TEST' as const, params: { message: 'failed test' } },
+    });
+    const evaluator = createPresentationEvaluator({
+      catalog: testCatalog,
+      policy: definePresentationPolicy(testCatalog, {
+        FAIL_TEST: [{
+          decide: () => ({
+            channel: 'inline',
+            severity: 'error',
+            messageKey: 'errors.failed',
+            target: 'name',
+          }),
+        }],
+      }),
+      fallback: () => ({
+        channel: 'silent',
+        severity: 'error',
+        messageKey: 'errors.fallback',
+      }),
+    });
+
+    function AutomaticPresentationComponent() {
+      const [, execute] = useResilioState(action, {
+        catalog: testCatalog,
+        presentation: { surface: 'profile-form' },
+      });
+      return (
+        <>
+          <button onClick={() => startTransition(() => execute(undefined))}>execute automatic</button>
+          <ResilioPresentationHost>
+            {({ active }) => <span>presentations: {active.length}</span>}
+          </ResilioPresentationHost>
+        </>
+      );
+    }
+
+    render(
+      <ResilioProvider evaluator={evaluator}>
+        <AutomaticPresentationComponent />
+      </ResilioProvider>,
+    );
+    await act(async () => screen.getByText('execute automatic').click());
+
+    expect(screen.getByText('presentations: 1')).toBeTruthy();
   });
 });

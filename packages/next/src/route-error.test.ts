@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { ErrorSink } from '@resilio/core';
+import type { ErrorSink } from '@resiliojs/core';
 import { createResilioOnRequestError } from './route-error.js';
 
 describe('createResilioOnRequestError', () => {

@@ -13,8 +13,30 @@ test('hydrates the public error form without console failures', async ({ page })
 
   await page.getByLabel('Name').fill('x');
   await page.getByRole('button', { name: 'Save' }).click();
-  await expect(page.getByText('입력 내용을 확인해 주세요.')).toBeVisible();
+  await expect(page.getByText('이름은 최소 2글자 이상이어야 합니다.')).toBeVisible();
   expect(consoleErrors.filter((message) => message.includes('hydration'))).toEqual([]);
+});
+
+test('dispatches expected action errors and project-owned modal UI automatically', async ({ page }) => {
+  await page.goto('/');
+
+  await page.getByLabel('Name').fill('x');
+  await page.getByRole('button', { name: 'Save' }).click();
+  await expect(page.getByText('이름은 최소 2글자 이상이어야 합니다.')).toBeVisible();
+
+  await page.getByRole('button', { name: 'Show custom modal' }).click();
+  const modal = page.getByRole('dialog', { name: 'Resilio custom modal' });
+  await expect(modal).toContainText('5초 후 다시 시도해 주세요.');
+  await modal.getByRole('button', { name: '닫기' }).click();
+  await expect(modal).toBeHidden();
+});
+
+test('integrates the actual TanStack MutationCache lifecycle without replacing it', async ({ page }) => {
+  await page.goto('/');
+
+  await page.getByRole('button', { name: 'Trigger TanStack mutation' }).click();
+  const modal = page.getByRole('dialog', { name: 'Resilio custom modal' });
+  await expect(modal).toContainText('10초 후 다시 시도해 주세요.');
 });
 
 test('preserves Next.js notFound and redirect control flow', async ({ page }) => {

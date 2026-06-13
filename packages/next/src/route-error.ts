@@ -1,6 +1,6 @@
 import type { Instrumentation } from 'next';
-import type { ErrorCatalog, ErrorSink } from '@resilio/core';
-import { reportToSinkBestEffort } from '@resilio/core';
+import type { ErrorCatalog, ErrorSink } from '@resiliojs/core';
+import { reportToSinkBestEffort } from '@resiliojs/core';
 
 /**
  * Next.js 15+ instrumentation.ts의 onRequestError 규격에 맞는 오류 관측성 핸들러를 생성합니다.
@@ -44,7 +44,7 @@ function getErrorDigest(error: unknown): string | undefined {
 }
 
 // 기존 하위 호환을 위한 레거시 헬퍼
-import { normalizeError, globalResilioEmitter, ResilioError } from '@resilio/core';
+import { normalizeError, globalResilioEmitter, ResilioError } from '@resiliojs/core';
 
 export interface RouteErrorOptions {
   digest?: string;
