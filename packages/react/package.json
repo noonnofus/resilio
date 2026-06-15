@@ -1,6 +1,6 @@
 {
   "name": "@resiliojs/react",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Headless React bindings for typed error presentation policies",
   "license": "MIT",
   "keywords": [

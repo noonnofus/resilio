@@ -1,43 +1,33 @@
 # Publishing
 
-## Prerequisites
+## Release Prerequisites
 
-1. The publishing npm account must have publish permission in the `resiliojs`
-   npm organization.
-2. Enable npm 2FA for publishing, or use a granular access token permitted to
-   publish.
-3. Log in locally without committing credentials:
+Configure npm Trusted Publishing for every `@resiliojs/*` package:
 
-```bash
-npm login --auth-type=web
-npm whoami
-```
+- Provider: GitHub Actions
+- Repository owner: `noonnofus`
+- Repository: `resilio`
+- Workflow filename: `release.yml`
+- Environment: `npm`
 
-## First Public Preview
+Create a protected GitHub environment named `npm`. The release workflow uses
+OIDC trusted publishing and does not require a long-lived npm token.
 
-Run the complete release gate:
+## Release Flow
 
-```bash
-pnpm check
-```
+1. Increment the root and all package versions to the same version.
+2. Run `pnpm check`.
+3. Merge the release changes into protected `main`.
+4. Create a GitHub Release with a matching `vX.Y.Z` tag from `main`.
+5. The `release.yml` workflow validates the tag, reruns the full gate, packs
+   each package, and publishes in dependency order with npm provenance.
 
-Confirm that the target versions are not already published:
+The release workflow rejects mismatched tags and package versions. It publishes
+the exact tarballs tested by the workflow rather than rebuilding between test
+and publish.
 
-```bash
-npm view @resiliojs/core@0.1.0 version
-npm view @resiliojs/react@0.1.0 version
-npm view @resiliojs/tanstack@0.1.0 version
-npm view @resiliojs/next@0.1.0 version
-```
-
-Publish in dependency order:
-
-```bash
-pnpm publish:preview
-```
-
-`pnpm publish` is required because it replaces internal `workspace:^`
-dependencies with publishable semver ranges.
+Do not create a Git tag for `0.1.0`; it was published manually without
+provenance and cannot be retroactively attested.
 
 ## Verify the Registry
 
@@ -51,7 +41,8 @@ npm view @resiliojs/next version
 Install the public packages in a clean consumer project before announcing the
 release.
 
-## Later Releases
+## Emergency Manual Publishing
 
-Do not overwrite a published version. Increment all affected package versions,
-run `pnpm check`, publish in dependency order, and create a matching Git tag.
+Use `pnpm publish:preview` only if Trusted Publishing is unavailable. Manual
+publishing requires npm authentication and does not provide the same
+repository-to-artifact provenance guarantees.

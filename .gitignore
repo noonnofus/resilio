@@ -16,5 +16,6 @@ docs/*
 !docs/capture-matrix.md
 !docs/migration-v1.md
 !docs/publishing.md
+!docs/sentry-integration.md
 !docs/tanstack-compatibility.md
 !docs/v1-api.md

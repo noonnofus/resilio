@@ -186,6 +186,13 @@ Router and Form adapters are available from `@resiliojs/tanstack/router` and
 - Automatic capture of every JavaScript exception
 - Sentry, OpenTelemetry, or another observability backend
 
+## API Ownership
+
+- Use `PresentationEvaluator` for expected public errors and user-facing UI.
+- Use `ExceptionReporter`/`ErrorSink` for unexpected exception observation.
+- `PolicyEngine` remains available for compatibility, but is not recommended
+  for new presentation-policy code.
+
 ## Documentation
 
 - [Capture Matrix](https://github.com/noonnofus/resilio/blob/main/docs/capture-matrix.md)
@@ -193,6 +200,7 @@ Router and Form adapters are available from `@resiliojs/tanstack/router` and
 - [Migration Guide](https://github.com/noonnofus/resilio/blob/main/docs/migration-v1.md)
 - [TanStack Compatibility](https://github.com/noonnofus/resilio/blob/main/docs/tanstack-compatibility.md)
 - [Publishing Guide](https://github.com/noonnofus/resilio/blob/main/docs/publishing.md)
+- [Sentry Integration](https://github.com/noonnofus/resilio/blob/main/docs/sentry-integration.md)
 
 ## Compatibility
 

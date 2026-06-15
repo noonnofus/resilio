@@ -1,0 +1,37 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: npm
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11.3.0
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: node scripts/verify-release-version.mjs
+      - run: pnpm check
+      - run: mkdir release-artifacts
+      - run: pnpm --filter @resiliojs/core pack --pack-destination release-artifacts
+      - run: pnpm --filter @resiliojs/react pack --pack-destination release-artifacts
+      - run: pnpm --filter @resiliojs/tanstack pack --pack-destination release-artifacts
+      - run: pnpm --filter @resiliojs/next pack --pack-destination release-artifacts
+      - run: npm publish release-artifacts/resiliojs-core-*.tgz --access public --provenance
+      - run: npm publish release-artifacts/resiliojs-react-*.tgz --access public --provenance
+      - run: npm publish release-artifacts/resiliojs-tanstack-*.tgz --access public --provenance
+      - run: npm publish release-artifacts/resiliojs-next-*.tgz --access public --provenance

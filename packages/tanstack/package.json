@@ -1,6 +1,6 @@
 {
   "name": "@resiliojs/tanstack",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Typed error presentation adapters for TanStack Query, Router, and Form",
   "license": "MIT",
   "keywords": [
