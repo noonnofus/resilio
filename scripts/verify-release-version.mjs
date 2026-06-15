@@ -21,4 +21,12 @@ for (const path of paths) {
   }
 }
 
+const releaseWorkflow = await readFile('.github/workflows/release.yml', 'utf8');
+for (const name of ['core', 'react', 'tanstack', 'next']) {
+  const command = `npm publish ./release-artifacts/resiliojs-${name}-*.tgz`;
+  if (!releaseWorkflow.includes(command)) {
+    throw new Error(`Release workflow must publish ${name} from an explicit local tarball path.`);
+  }
+}
+
 console.log(`Release versions match ${tag}.`);
