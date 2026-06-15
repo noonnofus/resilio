@@ -4,20 +4,15 @@ import { useMemo, type ReactNode } from 'react';
 import { MutationCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createResilioMutationCacheCallbacks } from '@resiliojs/tanstack/query';
 import {
-  PolicyEngine,
   ResilioErrorBoundary,
   ResilioPresentationHost,
   ResilioProvider,
   createPresentationEvaluator,
   usePresentError,
 } from '@resiliojs/next/client';
-import { appCatalog, appPolicy, appPresentationPolicy } from './catalog';
+import { appCatalog, appPresentationPolicy } from './catalog';
 
 export function Providers({ children }: { children: ReactNode }) {
-  const engine = useMemo(
-    () => new PolicyEngine({ catalog: appCatalog, policy: appPolicy }),
-    [],
-  );
   const evaluator = useMemo(
     () => createPresentationEvaluator({
       catalog: appCatalog,
@@ -32,7 +27,7 @@ export function Providers({ children }: { children: ReactNode }) {
   );
 
   return (
-    <ResilioProvider engine={engine} evaluator={evaluator}>
+    <ResilioProvider evaluator={evaluator}>
       <TanStackLayer>
         <ResilioErrorBoundary
           fallback={({ reset }) => <button onClick={reset}>화면 다시 시도</button>}

@@ -1,5 +1,10 @@
 import { ResilioError, serializeError } from '@resiliojs/core';
 
+/**
+ * @deprecated This legacy helper preserves expected-error messages and is not a
+ * general-purpose secret scrubber. Return catalog-backed `PublicActionResult`
+ * values created with `createPublicError` instead.
+ */
 export function sanitizeErrorForClient(
   error: ResilioError,
 ): ResilioError {

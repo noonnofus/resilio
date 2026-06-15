@@ -1,6 +1,6 @@
 {
   "name": "@resiliojs/core",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Framework-independent typed error presentation policy engine",
   "license": "MIT",
   "keywords": [

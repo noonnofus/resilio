@@ -70,7 +70,7 @@ export function ResilioErrorBoundary(props: ResilioErrorBoundaryProps) {
   const context = useContext(ResilioContext);
   const report = (error: Error, info: React.ErrorInfo) => {
     if (markExceptionReported(error)) {
-      context?.engine?.reportException(
+      context?.reporter?.reportException(
         error,
         { componentStack: info.componentStack },
         'react.caught',

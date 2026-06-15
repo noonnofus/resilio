@@ -51,4 +51,18 @@ describe('createResilioRootHandlers', () => {
 
     expect(sink.report).toHaveBeenCalledTimes(2);
   });
+
+  it('accepts a narrow exception reporter without a policy engine', () => {
+    const reporter = { reportException: vi.fn() };
+    const handlers = createResilioRootHandlers(reporter);
+    const error = new Error('caught');
+
+    handlers.onCaughtError(error, { componentStack: 'stack' });
+
+    expect(reporter.reportException).toHaveBeenCalledWith(
+      error,
+      { componentStack: 'stack' },
+      'react.caught',
+    );
+  });
 });
