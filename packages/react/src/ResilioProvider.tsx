@@ -4,6 +4,7 @@ import React, { createContext } from 'react';
 import type {
   BuiltInChannel,
   ErrorCatalog,
+  ExceptionReporter,
   PolicyEngine,
   PolicyDecision,
   PresentationEvaluator,
@@ -21,6 +22,7 @@ export type FeedbackAdapter = (
 
 export interface ResilioContextValue<T extends ErrorCatalog = ErrorCatalog> {
   engine?: PolicyEngine<T>;
+  reporter?: ExceptionReporter;
   feedback?: FeedbackAdapter;
 }
 
@@ -32,6 +34,7 @@ export interface ResilioProviderProps<
 > {
   children: React.ReactNode;
   engine?: PolicyEngine<T>;
+  reporter?: ExceptionReporter;
   feedback?: FeedbackAdapter;
   evaluator?: PresentationEvaluator<T, TChannel>;
   renderers?: RendererRegistry<TChannel>;
@@ -43,6 +46,7 @@ export function ResilioProvider<
 >({
   children,
   engine,
+  reporter,
   feedback,
   evaluator,
   renderers,
@@ -51,6 +55,7 @@ export function ResilioProvider<
     <ResilioContext.Provider
       value={{
         engine: engine as unknown as PolicyEngine<ErrorCatalog> | undefined,
+        reporter: reporter ?? engine,
         feedback,
       }}
     >

@@ -27,8 +27,9 @@ export function useReportError() {
 export function useOptionalReportError() {
   const context = useContext(ResilioContext);
   const engine = context?.engine;
+  const reporter = context?.reporter;
   const feedback = context?.feedback;
-  if (!engine) {
+  if (!engine && !reporter) {
     return null;
   }
 
@@ -37,6 +38,9 @@ export function useOptionalReportError() {
       error: PublicErrorValue,
       options?: { source?: ErrorSource; scopeKey?: string; context?: Record<string, unknown> }
     ) => {
+      if (!engine) {
+        throw new Error('Legacy public report APIs require the engine prop on ResilioProvider.');
+      }
       const decision = engine.reportPublic(
         error as PublicError<ErrorCatalog>,
         options?.context,
@@ -53,7 +57,7 @@ export function useOptionalReportError() {
       error: unknown,
       options?: { source?: ErrorSource; correlationId?: string; context?: Record<string, unknown> }
     ) => {
-      engine.reportException(
+      reporter?.reportException(
         error,
         options?.context,
         options?.source || 'manual',
@@ -64,7 +68,7 @@ export function useOptionalReportError() {
       reason: string,
       options?: { source?: ErrorSource; context?: Record<string, unknown> }
     ) => {
-      engine.reportInvalidPublicError(
+      engine?.reportInvalidPublicError(
         reason,
         options?.context,
         options?.source || 'manual',

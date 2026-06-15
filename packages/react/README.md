@@ -17,6 +17,10 @@ pnpm add @resiliojs/react
 - `ResilioErrorBoundary` and React root handlers
 - Explicit `capture`, `captureAsync`, and browser observability bridges
 
+Use the `evaluator` prop for expected public-error presentation and the
+`reporter` prop for unexpected exception observation. The legacy `engine` prop
+remains available for compatibility.
+
 ```tsx
 <ResilioProvider evaluator={evaluator}>
   <App />

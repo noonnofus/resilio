@@ -5,7 +5,8 @@
 Legacy `Result`, retry, normalize, emitter, and `PolicyEngine` APIs remain
 temporarily available for compatibility, but they are not the v1 product
 center. New code should use the public catalog, presentation evaluator, and
-framework adapters.
+framework adapters. Unexpected exception observation should use the narrower
+`ExceptionReporter`/`ErrorSink` contracts instead of creating a `PolicyEngine`.
 
 ## Migration Steps
 

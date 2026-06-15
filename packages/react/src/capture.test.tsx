@@ -54,4 +54,24 @@ describe('capture helpers', () => {
       error,
     }));
   });
+
+  it('connects event handlers to a reporter without a legacy policy engine', async () => {
+    const reporter = { reportException: vi.fn() };
+    const error = new Error('event failed');
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <ResilioProvider reporter={reporter}>{children}</ResilioProvider>
+    );
+    const { result } = renderHook(
+      () => useResilioHandler(() => { throw error; }),
+      { wrapper },
+    );
+
+    expect(() => result.current()).toThrow(error);
+    expect(reporter.reportException).toHaveBeenCalledWith(
+      error,
+      undefined,
+      'react.event',
+      undefined,
+    );
+  });
 });

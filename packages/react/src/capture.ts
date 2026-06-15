@@ -55,7 +55,7 @@ export function useResilioHandler<TArgs extends readonly unknown[], TResult>(
     capture(
       handler,
       (error, reportOptions) => {
-        context?.engine?.reportException(
+        context?.reporter?.reportException(
           error,
           reportOptions?.context,
           reportOptions?.source ?? 'react.event',
@@ -64,6 +64,6 @@ export function useResilioHandler<TArgs extends readonly unknown[], TResult>(
       },
       options,
     ),
-    [context?.engine, handler, options],
+    [context?.reporter, handler, options],
   );
 }

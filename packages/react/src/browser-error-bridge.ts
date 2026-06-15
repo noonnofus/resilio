@@ -44,14 +44,14 @@ export function useResilioBrowserErrorBridge(): void {
   const context = useContext(ResilioContext);
 
   useEffect(() => {
-    if (!context?.engine) return;
+    if (!context?.reporter) return;
     return installResilioBrowserErrorBridge((error, options) => {
-      context.engine?.reportException(
+      context.reporter?.reportException(
         error,
         options?.context,
         options?.source as ErrorSource | undefined,
         options?.correlationId,
       );
     });
-  }, [context?.engine]);
+  }, [context?.reporter]);
 }

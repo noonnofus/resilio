@@ -2,6 +2,12 @@
 
 ## Core
 
+- `PresentationEvaluator` is the recommended API for expected, user-facing
+  public errors.
+- `ExceptionReporter` and `ErrorSink` are the recommended APIs for unexpected
+  exception observation.
+- `PolicyEngine` remains available for compatibility; new code should not use
+  it as the presentation policy center.
 - `defineErrorCatalog`: allow-list and runtime schema for public error payloads.
 - `decodePublicError`: validates unknown values at trust boundaries.
 - `definePresentationPolicy`: exhaustive code-to-plan policy.
@@ -21,6 +27,10 @@ most one. Override `interruptiveChannels` for project-defined channels.
 - `ResilioErrorBoundary`, `createResilioRootHandlers`
 - `capture`, `captureAsync`, `useResilioHandler`
 - `installResilioBrowserErrorBridge`, `useResilioBrowserErrorBridge`
+
+Pass `evaluator` to own user-facing presentation. Pass `reporter` only for
+exception paths that are not already owned by Sentry or another framework
+integration. The legacy `engine` prop remains supported for compatibility.
 
 Renderers are side effects owned by the app. Renderer failures are isolated from
 the user flow. `dismissOccurrence` removes every active UI item derived from the

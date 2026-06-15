@@ -179,6 +179,42 @@ export interface ErrorSink<T extends ErrorCatalog> {
   report(event: ErrorEvent<T>): void | Promise<void>;
 }
 
+export interface ExceptionReporter {
+  reportException(
+    error: unknown,
+    context?: Record<string, unknown>,
+    source?: ErrorSource,
+    correlationId?: string,
+  ): void;
+}
+
+export interface ExceptionReporterOptions {
+  idProvider?: () => string;
+  now?: () => number;
+}
+
+export function createExceptionReporter<T extends ErrorCatalog>(
+  sink: ErrorSink<T>,
+  {
+    idProvider = () => Math.random().toString(36).slice(2),
+    now = Date.now,
+  }: ExceptionReporterOptions = {},
+): ExceptionReporter {
+  return {
+    reportException(error, context, source = 'manual', correlationId) {
+      void reportToSinkBestEffort(sink, {
+        occurrenceId: idProvider(),
+        timestamp: now(),
+        source,
+        kind: 'exception',
+        error,
+        correlationId,
+        context,
+      });
+    },
+  };
+}
+
 export function createConsoleSink<T extends ErrorCatalog>(): ErrorSink<T> {
   return {
     report(event) {
@@ -352,7 +388,11 @@ export interface PolicyEngineOptions<T extends ErrorCatalog> {
   idProvider?: () => string;
 }
 
-export class PolicyEngine<T extends ErrorCatalog> {
+/**
+ * @deprecated New code should use `PresentationEvaluator` for user-facing
+ * decisions and an `ExceptionReporter`/`ErrorSink` for exception observation.
+ */
+export class PolicyEngine<T extends ErrorCatalog> implements ExceptionReporter {
   private catalog: T;
   private policy: ErrorPolicyConfig<T>;
   private sink?: ErrorSink<T>;
