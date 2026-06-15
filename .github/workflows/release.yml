@@ -31,7 +31,7 @@ jobs:
       - run: pnpm --filter @resiliojs/react pack --pack-destination release-artifacts
       - run: pnpm --filter @resiliojs/tanstack pack --pack-destination release-artifacts
       - run: pnpm --filter @resiliojs/next pack --pack-destination release-artifacts
-      - run: npm publish release-artifacts/resiliojs-core-*.tgz --access public --provenance
-      - run: npm publish release-artifacts/resiliojs-react-*.tgz --access public --provenance
-      - run: npm publish release-artifacts/resiliojs-tanstack-*.tgz --access public --provenance
-      - run: npm publish release-artifacts/resiliojs-next-*.tgz --access public --provenance
+      - run: npm publish ./release-artifacts/resiliojs-core-*.tgz --access public --provenance
+      - run: npm publish ./release-artifacts/resiliojs-react-*.tgz --access public --provenance
+      - run: npm publish ./release-artifacts/resiliojs-tanstack-*.tgz --access public --provenance
+      - run: npm publish ./release-artifacts/resiliojs-next-*.tgz --access public --provenance
