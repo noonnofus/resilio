@@ -183,6 +183,54 @@ describe('useResilioState', () => {
     }));
   });
 
+  it('does not expose raw auth or database errors as public presentation input', async () => {
+    const present = vi.fn();
+    const onError = vi.fn();
+    const onInvalidPublicError = vi.fn();
+    const sensitive = {
+      code: 'FAIL_TEST' as const,
+      params: { message: 'safe' },
+      password: 'AUTH_PASSWORD',
+      stack: 'DATABASE_CONNECTION_STRING',
+    };
+    const action = async () => ({
+      ok: false as const,
+      error: sensitive,
+    });
+
+    function SensitivePayloadComponent() {
+      const [, execute] = useResilioState(action, {
+        catalog: testCatalog,
+        onError,
+        onInvalidPublicError,
+      });
+      return (
+        <button
+          data-testid="sensitive-submit"
+          onClick={() => startTransition(() => execute(undefined))}
+        >
+          Execute
+        </button>
+      );
+    }
+
+    render(
+      <ResilioProvider
+        evaluator={{ evaluateUnknown: present }}
+      >
+        <SensitivePayloadComponent />
+      </ResilioProvider>,
+    );
+
+    await act(async () => {
+      screen.getByTestId('sensitive-submit').click();
+    });
+
+    expect(onInvalidPublicError).toHaveBeenCalledWith('invalid_shape');
+    expect(onError).not.toHaveBeenCalled();
+    expect(present).not.toHaveBeenCalled();
+  });
+
   it('automatically presents expected action errors without a legacy engine', async () => {
     const action = async () => ({
       ok: false as const,

@@ -63,4 +63,22 @@ describe('createResilioAction', () => {
     expect(isSuccessfulResilioAction(result)).toBe(true);
     expect(testCatalog.FAIL_TEST).toBeDefined();
   });
+
+  it('preserves Next.js redirect control flow', async () => {
+    const controlFlow = { digest: 'NEXT_REDIRECT;replace;/dashboard;307;' };
+    const action = createResilioAction(async (): Promise<never> => {
+      throw controlFlow;
+    });
+
+    await expect(action()).rejects.toBe(controlFlow);
+  });
+
+  it('preserves Next.js notFound control flow', async () => {
+    const controlFlow = { digest: 'NEXT_HTTP_ERROR_FALLBACK;404' };
+    const action = createResilioAction(async (): Promise<never> => {
+      throw controlFlow;
+    });
+
+    await expect(action()).rejects.toBe(controlFlow);
+  });
 });
